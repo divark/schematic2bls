@@ -105,22 +105,32 @@ pub fn clear_largest_cube_from(largest_cube: &LargestCube, grid: &mut [Vec<Vec<u
     }
 }
 
+#[derive(PartialEq, Debug)]
 pub struct BlocklandBrick {
     coordinates: (f32, f32, f32),
     cube_length: f32,
+}
+
+fn round(x: f32, decimals: u32) -> f32 {
+    let y = 10i32.pow(decimals) as f32;
+    (x * y).round() / y
 }
 
 impl BlocklandBrick {
     pub fn new(largest_cube: &LargestCube) -> BlocklandBrick {
         let cube_length = largest_cube.side_length as f32;
 
-        let x = largest_cube.indexes.0 as f32 - (cube_length / 2.0);
-        let y = largest_cube.indexes.1 as f32 - (cube_length / 2.0);
+        let x_multiple = ((largest_cube.indexes.0 as f32) / cube_length) - 1.0;
+        let y_multiple = ((largest_cube.indexes.1 as f32) / cube_length) - 1.0;
+
+        let x = x_multiple * (cube_length / 2.0);  
+        let y = y_multiple * (cube_length / 2.0);
         let mut z = f32::log2(largest_cube.indexes.2 as f32 - (cube_length / 2.0)).floor();
+
         if cube_length == 1.0 {
             z = 0.3;
             for _i in 1..largest_cube.indexes.2 {
-                z += 0.6;
+                z = round(z + 0.6, 1);
             }
         }
 
@@ -272,5 +282,133 @@ mod tests {
 
         let expected = vec![vec![vec![0; grid_size + 1]; grid_size + 1]; grid_size + 1];
         assert_eq!(expected, found_cubes);
+    }
+
+    #[test]
+    fn blockland_coordinates_1x1_bottomright() {
+        let largest_cube_found = LargestCube {
+            side_length: 1,
+            indexes: (1, 1, 1),
+        };
+
+        let expected_blockland_brick = BlocklandBrick {
+            cube_length: 1.0,
+            coordinates: (0.0, 0.0, 0.3)
+        };
+        let actual = BlocklandBrick::new(&largest_cube_found);
+
+        assert_eq!(expected_blockland_brick, actual);
+    }
+
+    #[test]
+    fn blockland_coordinates_1x1_topright() {
+        let largest_cube_found = LargestCube {
+            side_length: 1,
+            indexes: (1, 2, 1),
+        };
+
+        let expected_blockland_brick = BlocklandBrick {
+            cube_length: 1.0,
+            coordinates: (0.0, 0.5, 0.3)
+        };
+        let actual = BlocklandBrick::new(&largest_cube_found);
+
+        assert_eq!(expected_blockland_brick, actual);
+    }
+
+    #[test]
+    fn blockland_coordinates_1x1_topleft() {
+        let largest_cube_found = LargestCube {
+            side_length: 1,
+            indexes: (2, 2, 1),
+        };
+
+        let expected_blockland_brick = BlocklandBrick {
+            cube_length: 1.0,
+            coordinates: (0.5, 0.5, 0.3)
+        };
+        let actual = BlocklandBrick::new(&largest_cube_found);
+
+        assert_eq!(expected_blockland_brick, actual);
+    }
+
+    #[test]
+    fn blockland_coordinates_1x1_bottomleft() {
+        let largest_cube_found = LargestCube {
+            side_length: 1,
+            indexes: (2, 1, 1),
+        };
+
+        let expected_blockland_brick = BlocklandBrick {
+            cube_length: 1.0,
+            coordinates: (0.5, 0.0, 0.3)
+        };
+        let actual = BlocklandBrick::new(&largest_cube_found);
+
+        assert_eq!(expected_blockland_brick, actual);
+    }
+
+    #[test]
+    fn blockland_coordinates_1x1_spaced() {
+        let largest_cube_found = LargestCube {
+            side_length: 1,
+            indexes: (5, 5, 5),
+        };
+
+        let expected_blockland_brick = BlocklandBrick {
+            cube_length: 1.0,
+            coordinates: (2.0, 2.0, 2.7)
+        };
+        let actual = BlocklandBrick::new(&largest_cube_found);
+
+        assert_eq!(expected_blockland_brick, actual);
+    }
+
+    #[test]
+    fn blockland_coordinates_4x4_topleft() {
+        let largest_cube_found = LargestCube {
+            side_length: 4,
+            indexes: (4, 4, 4),
+        };
+
+        let expected_blockland_brick = BlocklandBrick {
+            cube_length: 4.0,
+            coordinates: (0.0, 0.0, 1.0)
+        };
+        let actual = BlocklandBrick::new(&largest_cube_found);
+
+        assert_eq!(expected_blockland_brick, actual);
+    }
+
+    #[test]
+    fn blockland_coordinates_4x4_topright() {
+        let largest_cube_found = LargestCube {
+            side_length: 4,
+            indexes: (4, 8, 4),
+        };
+
+        let expected_blockland_brick = BlocklandBrick {
+            cube_length: 4.0,
+            coordinates: (0.0, 2.0, 1.0)
+        };
+        let actual = BlocklandBrick::new(&largest_cube_found);
+
+        assert_eq!(expected_blockland_brick, actual);
+    }
+
+    #[test]
+    fn blockland_coordinates_8x8_topright() {
+        let largest_cube_found = LargestCube {
+            side_length: 8,
+            indexes: (8, 16, 8),
+        };
+
+        let expected_blockland_brick = BlocklandBrick {
+            cube_length: 8.0,
+            coordinates: (0.0, 4.0, 2.0)
+        };
+        let actual = BlocklandBrick::new(&largest_cube_found);
+
+        assert_eq!(expected_blockland_brick, actual);
     }
 }
