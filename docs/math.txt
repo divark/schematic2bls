@@ -1,0 +1,10 @@
+Blockland places bricks based on midpoints, so the following math is important:
+- x: x - (len / 2)
+- y: y + (len / 2)
+
+When placing two bricks adjacent to each other, the following formulas are needed:
+- for x, y, let current = {
+	  x - len = 0 => x - (len / 2),
+	  x - len > 0 => (current + last) / 2
+          }
+- let last = current
