@@ -120,7 +120,7 @@ impl Brick {
     }
 
     pub fn next_to(&mut self, direction: Direction, other_brick: &Brick) {
-        let square_radius = self.size as f32/ 2.0;
+        let square_radius = self.size as f32 / 2.0;
         self.position = other_brick.position;
 
         match direction {
@@ -133,8 +133,12 @@ impl Brick {
 
     pub fn from_right_coordinate(size: u32, right_position: (usize, usize, usize)) -> Brick {
         Brick {
-            position: ((right_position.0 as f32 / 2.0) - (size as f32 / 2.0), (right_position.1 as f32 / 2.0) - (size as f32 / 2.0), (right_position.2 as f32 / 2.0) - (size as f32 / 4.0)),
-            size
+            position: (
+                (right_position.0 as f32 / 2.0) - (size as f32 / 2.0),
+                (right_position.1 as f32 / 2.0) - (size as f32 / 2.0),
+                (right_position.2 as f32 / 2.0) - (size as f32 / 4.0),
+            ),
+            size,
         }
     }
 }
@@ -164,7 +168,12 @@ mod tests {
     #[test]
     fn place_3x3_4x_cubes() {
         let mut bricks = vec![Brick::new(4)];
-        let cross_direction_order = vec![Direction::Left, Direction::Right, Direction::Up, Direction::Down];
+        let cross_direction_order = vec![
+            Direction::Left,
+            Direction::Right,
+            Direction::Up,
+            Direction::Down,
+        ];
 
         for direction in cross_direction_order {
             let mut neighboring_brick = Brick::new(4);
@@ -198,7 +207,10 @@ mod tests {
 
         let mut bricks = Vec::new();
         for y_coord in desired_y_coordinates {
-            bricks.push(Brick::from_right_coordinate(4, (desired_x_coordinate, y_coord, desired_z_coordinate)));
+            bricks.push(Brick::from_right_coordinate(
+                4,
+                (desired_x_coordinate, y_coord, desired_z_coordinate),
+            ));
         }
 
         let expected = include_str!("../assets/brick_comparisons/4xCubesLine.bls").to_string();

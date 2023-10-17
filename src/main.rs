@@ -1,10 +1,10 @@
-use grid2bls::{Brick, to_save_file_output};
+use grid2bls::{to_save_file_output, Brick};
 use nbt::{decode::*, CompoundTag};
-use std::io::Cursor;
 use std::env;
-use std::path::Path;
 use std::fs::{self, File};
+use std::io::Cursor;
 use std::io::Write;
+use std::path::Path;
 
 fn main() {
     let command_args: Vec<String> = env::args().collect();
@@ -16,17 +16,22 @@ fn main() {
 
     let file_path = Path::new(&command_args[1]);
     if !file_path.exists() {
-        eprintln!("{}: File {} was not found.", command_args[0], command_args[1]);
+        eprintln!(
+            "{}: File {} was not found.",
+            command_args[0], command_args[1]
+        );
         return;
     }
 
-
     let mut file_cursor =
         Cursor::new(fs::read(file_path).expect("grid2bls: Could not read file into bytes."));
-    
+
     let schematic_tag = read_gzip_compound_tag(&mut file_cursor);
     if schematic_tag.is_err() {
-        eprintln!("{}: Invalid schematic file given from file {}", command_args[0], command_args[1]);
+        eprintln!(
+            "{}: Invalid schematic file given from file {}",
+            command_args[0], command_args[1]
+        );
         return;
     }
 
@@ -36,25 +41,40 @@ fn main() {
 
     let mut bricks = Vec::new();
     while let Some(found_largest_cube) = get_largest_cube(&largest_cubes) {
-        let parsed_brick = Brick::from_right_coordinate(found_largest_cube.side_length as u32, found_largest_cube.indexes);
+        let parsed_brick = Brick::from_right_coordinate(
+            found_largest_cube.side_length as u32,
+            found_largest_cube.indexes,
+        );
         bricks.push(parsed_brick);
     }
 
     let save_file_contents = to_save_file_output(&bricks);
 
-    let mut output_file_name = String::from(file_path.file_stem().expect("grid2bls: File does not have a stem, huh.").to_str().expect("grid2bls: Could not convert OSString to str."));
+    let mut output_file_name = String::from(
+        file_path
+            .file_stem()
+            .expect("grid2bls: File does not have a stem, huh.")
+            .to_str()
+            .expect("grid2bls: Could not convert OSString to str."),
+    );
     output_file_name.push_str(".bls");
 
     let output = File::create(&output_file_name);
     if let Err(msg) = output {
-        eprintln!("{}: Could not write output file {}: {}", command_args[0], output_file_name, msg);
+        eprintln!(
+            "{}: Could not write output file {}: {}",
+            command_args[0], output_file_name, msg
+        );
         return;
     }
 
     let mut output_file = output.expect("grid2bls: File should be created by now.");
 
     if let Err(msg) = output_file.write_all(save_file_contents.as_bytes()) {
-        eprintln!("{}: Could not write to newly created output file {}: {}", command_args[0], output_file_name, msg);
+        eprintln!(
+            "{}: Could not write to newly created output file {}: {}",
+            command_args[0], output_file_name, msg
+        );
     }
 }
 
@@ -153,9 +173,21 @@ pub fn clear_largest_cube_from(largest_cube: &LargestCube, grid: &mut [Vec<Vec<u
     let start_j = (largest_cube.indexes.1 - largest_cube.side_length) + 1;
     let start_k = (largest_cube.indexes.2 - largest_cube.side_length) + 1;
 
-    for length_entry in grid.iter_mut().skip(start_i).take(largest_cube.indexes.0 + 1) {
-        for width_entry in length_entry.iter_mut().skip(start_j).take(largest_cube.indexes.1 + 1) {
-            for height_entry in width_entry.iter_mut().skip(start_k).take(largest_cube.indexes.2 + 1) {
+    for length_entry in grid
+        .iter_mut()
+        .skip(start_i)
+        .take(largest_cube.indexes.0 + 1)
+    {
+        for width_entry in length_entry
+            .iter_mut()
+            .skip(start_j)
+            .take(largest_cube.indexes.1 + 1)
+        {
+            for height_entry in width_entry
+                .iter_mut()
+                .skip(start_k)
+                .take(largest_cube.indexes.2 + 1)
+            {
                 *height_entry = 0;
             }
         }
