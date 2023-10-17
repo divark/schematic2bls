@@ -1,8 +1,61 @@
+use grid2bls::{Brick, to_save_file_output};
 use nbt::{decode::*, CompoundTag};
 use std::io::Cursor;
+use std::env;
+use std::path::Path;
+use std::fs::{self, File};
+use std::io::Write;
 
 fn main() {
-    println!("Hello! This is a placeholder!");
+    let command_args: Vec<String> = env::args().collect();
+
+    if command_args.len() != 2 {
+        eprintln!("Usage: {} schematic_file_path", command_args[0]);
+        return;
+    }
+
+    let file_path = Path::new(&command_args[1]);
+    if !file_path.exists() {
+        eprintln!("{}: File {} was not found.", command_args[0], command_args[1]);
+        return;
+    }
+
+
+    let mut file_cursor =
+        Cursor::new(fs::read(file_path).expect("grid2bls: Could not read file into bytes."));
+    
+    let schematic_tag = read_gzip_compound_tag(&mut file_cursor);
+    if schematic_tag.is_err() {
+        eprintln!("{}: Invalid schematic file given from file {}", command_args[0], command_args[1]);
+        return;
+    }
+
+    let schematic_tag = schematic_tag.expect("grid2bls: A Compound Tag should exist by now.");
+    let three_dimensional_grid = schematic_to_3dgrid(schematic_tag);
+    let largest_cubes = grid_to_largest_cubes(three_dimensional_grid);
+
+    let mut bricks = Vec::new();
+    while let Some(found_largest_cube) = get_largest_cube(&largest_cubes) {
+        let parsed_brick = Brick::from_right_coordinate(found_largest_cube.side_length as u32, found_largest_cube.indexes);
+        bricks.push(parsed_brick);
+    }
+
+    let save_file_contents = to_save_file_output(&bricks);
+
+    let mut output_file_name = String::from(file_path.file_stem().expect("grid2bls: File does not have a stem, huh.").to_str().expect("grid2bls: Could not convert OSString to str."));
+    output_file_name.push_str(".bls");
+
+    let output = File::create(&output_file_name);
+    if let Err(msg) = output {
+        eprintln!("{}: Could not write output file {}: {}", command_args[0], output_file_name, msg);
+        return;
+    }
+
+    let mut output_file = output.expect("grid2bls: File should be created by now.");
+
+    if let Err(msg) = output_file.write_all(save_file_contents.as_bytes()) {
+        eprintln!("{}: Could not write to newly created output file {}: {}", command_args[0], output_file_name, msg);
+    }
 }
 
 pub fn schematic_to_3dgrid(schematic_root: CompoundTag) -> Vec<Vec<Vec<bool>>> {
@@ -39,7 +92,7 @@ pub struct LargestCube {
     pub indexes: (usize, usize, usize),
 }
 
-fn get_largest_cube(largest_cube_grid: &Vec<Vec<Vec<usize>>>) -> LargestCube {
+fn get_largest_cube(largest_cube_grid: &[Vec<Vec<usize>>]) -> Option<LargestCube> {
     let mut largest_entry_found = 0;
     let (mut i, mut j, mut k) = (0, 0, 0);
 
@@ -57,10 +110,14 @@ fn get_largest_cube(largest_cube_grid: &Vec<Vec<Vec<usize>>>) -> LargestCube {
         }
     }
 
-    LargestCube {
+    if largest_entry_found == 0 {
+        return None;
+    }
+
+    Some(LargestCube {
         side_length: largest_entry_found,
         indexes: (i, j, k),
-    }
+    })
 }
 
 pub fn grid_to_largest_cubes(grid: Vec<Vec<Vec<bool>>>) -> Vec<Vec<Vec<usize>>> {
@@ -103,52 +160,6 @@ pub fn clear_largest_cube_from(largest_cube: &LargestCube, grid: &mut [Vec<Vec<u
             }
         }
     }
-}
-
-#[derive(PartialEq, Debug)]
-pub struct BlocklandBrick {
-    coordinates: (f32, f32, f32),
-    is_baseplate: bool,
-    cube_length: f32,
-}
-
-fn round(x: f32, decimals: u32) -> f32 {
-    let y = 10i32.pow(decimals) as f32;
-    (x * y).round() / y
-}
-
-impl BlocklandBrick {
-    pub fn new(largest_cube: &LargestCube) -> BlocklandBrick {
-        let cube_length = largest_cube.side_length as f32;
-
-        let x_multiple = ((largest_cube.indexes.0 as f32) / cube_length) - 1.0;
-        let y_multiple = ((largest_cube.indexes.1 as f32) / cube_length) - 1.0;
-
-        let x = x_multiple * (cube_length / 2.0);  
-        let y = y_multiple * (cube_length / 2.0);
-        let mut z = (largest_cube.indexes.2 as f32 - (cube_length / 2.0)) * 0.5;
-
-        if cube_length == 1.0 {
-            z = 0.3;
-            for _i in 1..largest_cube.indexes.2 {
-                z = round(z + 0.6, 1);
-            }
-        }
-
-        BlocklandBrick {
-            coordinates: (x, y, z),
-            is_baseplate: largest_cube.indexes.2 == largest_cube.side_length,
-            cube_length,
-        }
-    }
-
-    // TODO: Map properties to string accordingly from following resource:
-    // https://docs.rs/bl_save/latest/bl_save/struct.BrickBase.html
-    // pub fn to_string(&self) -> String {
-    //     let block_line = format!("{}x{}\" {} {} {} 0 1 0  0 0 1 1 1");
-
-    //     block_line
-    // }
 }
 
 #[cfg(test)]
@@ -208,7 +219,7 @@ mod tests {
             indexes: (2, 2, 2),
         };
 
-        let actual = get_largest_cube(&found_cubes);
+        let actual = get_largest_cube(&found_cubes).unwrap();
 
         assert_eq!(expected, actual);
     }
@@ -229,7 +240,7 @@ mod tests {
         let mut found_cubes = grid_to_largest_cubes(grid);
         let largest_cube_found = get_largest_cube(&found_cubes);
 
-        clear_largest_cube_from(&largest_cube_found, &mut found_cubes);
+        clear_largest_cube_from(&largest_cube_found.unwrap(), &mut found_cubes);
 
         let expected = vec![vec![vec![0; cube_size + 1]; cube_size + 1]; cube_size + 1];
         assert_eq!(expected, found_cubes);
@@ -257,7 +268,7 @@ mod tests {
             indexes: (5, 5, 5),
         };
 
-        let actual = get_largest_cube(&found_cubes);
+        let actual = get_largest_cube(&found_cubes).unwrap();
 
         assert_eq!(expected, actual);
     }
@@ -280,192 +291,9 @@ mod tests {
         let mut found_cubes = grid_to_largest_cubes(grid);
         let largest_cube_found = get_largest_cube(&found_cubes);
 
-        clear_largest_cube_from(&largest_cube_found, &mut found_cubes);
+        clear_largest_cube_from(&largest_cube_found.unwrap(), &mut found_cubes);
 
         let expected = vec![vec![vec![0; grid_size + 1]; grid_size + 1]; grid_size + 1];
         assert_eq!(expected, found_cubes);
-    }
-
-    fn get_largest_test_cubes(side_length: usize) -> Vec<LargestCube> {
-        let mut largest_cubes = Vec::new();
-        for i in 1..=2 {
-            for j in 1..=2 {
-                largest_cubes.push(LargestCube {
-                    side_length,
-                    indexes: (side_length * i, side_length * j, side_length)
-                });
-            }
-        }
-
-        largest_cubes.push(LargestCube {
-            side_length,
-            indexes: (side_length, side_length, side_length * 2)
-        });
-
-        largest_cubes
-    }
-
-    fn get_z_base_for_cube(side_length: usize) -> f32 {
-        let z_base = match side_length {
-            1 => 0.3,
-            2 => 0.5,
-            4 => 1.0,
-            8 => 2.0,
-            16 => 4.0,
-            32 => 8.0,
-            64 => 16.0,
-            _ => panic!("Unsupported cube fed to z_base test function")
-        };
-
-        z_base
-    }
-
-    fn get_blockland_test_bricks(side_length: usize) -> Vec<BlocklandBrick> {
-        let mut blockland_bricks = Vec::new();
-
-        let base_z = get_z_base_for_cube(side_length);
-        for i in 1..=2 {
-            let x_index = (side_length as f32 / 2.0) * (i - 1) as f32;
-            for j in 1..=2 {
-                let y_index = (side_length as f32 / 2.0) * (j - 1) as f32;
-
-                blockland_bricks.push(BlocklandBrick {
-                    coordinates: (x_index, y_index, base_z),
-                    is_baseplate: true,
-                    cube_length: side_length as f32,
-                });
-            }
-        }
-
-        let cube_coordinate = (side_length / 2) as f32;
-        let mut z_adjusted = get_z_base_for_cube(side_length);
-        if side_length == 1 {
-            z_adjusted += 0.6;
-        } else {
-            z_adjusted += cube_coordinate;
-        }
-
-        blockland_bricks.push(BlocklandBrick {
-            coordinates: (0.0, 0.0, round(z_adjusted, 2)),
-            is_baseplate: false,
-            cube_length: side_length as f32,
-        });
-
-        blockland_bricks
-    }
-
-    #[test]
-    fn blockland_coordinates_1xcube_right_pyramid() {
-        let side_length = 1;
-
-        let largest_cubes = get_largest_test_cubes(side_length);
-
-        let expected_blockland_bricks = get_blockland_test_bricks(side_length);
-        for (idx, largest_cube) in largest_cubes.iter().enumerate() {
-            let actual = BlocklandBrick::new(largest_cube);
-
-            assert_eq!(expected_blockland_bricks[idx], actual, "On {}th entry", idx);
-        }
-    }
-
-    #[test]
-    fn blockland_coordinates_1x1_spaced() {
-        let largest_cube_found = LargestCube {
-            side_length: 1,
-            indexes: (5, 5, 5),
-        };
-
-        let expected_blockland_brick = BlocklandBrick {
-            cube_length: 1.0,
-            is_baseplate: false,
-            coordinates: (2.0, 2.0, 2.7)
-        };
-        let actual = BlocklandBrick::new(&largest_cube_found);
-
-        assert_eq!(expected_blockland_brick, actual);
-    }
-
-    #[test]
-    fn blockland_coordinates_2xcube_right_pyramid() {
-        let side_length = 2;
-
-        let largest_cubes = get_largest_test_cubes(side_length);
-
-        let expected_blockland_bricks = get_blockland_test_bricks(side_length);
-        for (idx, largest_cube) in largest_cubes.iter().enumerate() {
-            let actual = BlocklandBrick::new(largest_cube);
-
-            assert_eq!(expected_blockland_bricks[idx], actual, "On {}th entry", idx);
-        }
-    }
-
-    #[test]
-    fn blockland_coordinates_4xcube_right_pyramid() {
-        let side_length = 4;
-
-        let largest_cubes = get_largest_test_cubes(side_length);
-
-        let expected_blockland_bricks = get_blockland_test_bricks(side_length);
-        for (idx, largest_cube) in largest_cubes.iter().enumerate() {
-            let actual = BlocklandBrick::new(largest_cube);
-
-            assert_eq!(expected_blockland_bricks[idx], actual, "On {}th entry", idx);
-        }
-    }
-
-    #[test]
-    fn blockland_coordinates_8xcube_right_pyramid() {
-        let side_length = 8;
-
-        let largest_cubes = get_largest_test_cubes(side_length);
-
-        let expected_blockland_bricks = get_blockland_test_bricks(side_length);
-        for (idx, largest_cube) in largest_cubes.iter().enumerate() {
-            let actual = BlocklandBrick::new(largest_cube);
-
-            assert_eq!(expected_blockland_bricks[idx], actual, "On {}th entry", idx);
-        }
-    }
-
-    #[test]
-    fn blockland_coordinates_16xcube_right_pyramid() {
-        let side_length = 16;
-
-        let largest_cubes = get_largest_test_cubes(side_length);
-
-        let expected_blockland_bricks = get_blockland_test_bricks(side_length);
-        for (idx, largest_cube) in largest_cubes.iter().enumerate() {
-            let actual = BlocklandBrick::new(largest_cube);
-
-            assert_eq!(expected_blockland_bricks[idx], actual, "On {}th entry", idx);
-        }
-    }
-
-    #[test]
-    fn blockland_coordinates_32xcube_right_pyramid() {
-        let side_length = 32;
-
-        let largest_cubes = get_largest_test_cubes(side_length);
-
-        let expected_blockland_bricks = get_blockland_test_bricks(side_length);
-        for (idx, largest_cube) in largest_cubes.iter().enumerate() {
-            let actual = BlocklandBrick::new(largest_cube);
-
-            assert_eq!(expected_blockland_bricks[idx], actual, "On {}th entry", idx);
-        }
-    }
-
-    #[test]
-    fn blockland_coordinates_64xcube_right_pyramid() {
-        let side_length = 64;
-
-        let largest_cubes = get_largest_test_cubes(side_length);
-
-        let expected_blockland_bricks = get_blockland_test_bricks(side_length);
-        for (idx, largest_cube) in largest_cubes.iter().enumerate() {
-            let actual = BlocklandBrick::new(largest_cube);
-
-            assert_eq!(expected_blockland_bricks[idx], actual, "On {}th entry", idx);
-        }
     }
 }
