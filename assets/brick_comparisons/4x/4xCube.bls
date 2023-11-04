@@ -65,12 +65,6 @@ This is a Blockland save file.  You probably shouldn't modify it cause you'll sc
 1.000000 0.000000 1.000000 0.000000
 1.000000 0.000000 1.000000 0.000000
 1.000000 0.000000 1.000000 0.000000
-Linecount 4
-32x Cube" 0 0 8 0 1 0  0 0 1 1 1
-+-OWNER 999999
-32x Cube" 0 16 8 0 1 0  0 0 1 1 1
-+-OWNER 999999
-32x Cube" 0 32 8 0 1 0  0 0 1 1 1
-+-OWNER 999999
-32x Cube" 0 48 8 0 1 0  0 0 1 1 1
+Linecount 1
+4x Cube" 0 0 1 0 1 0  0 0 1 1 1
 +-OWNER 999999
