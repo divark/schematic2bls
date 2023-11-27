@@ -125,27 +125,19 @@ impl Brick {
         }
     }
 
-    pub fn next_to(&mut self, direction: Direction, other_brick: &Brick) {
-        let square_radius = self.size as f32 / 2.0;
-        self.position = other_brick.position;
-
-        match direction {
-            Direction::Up => self.position.1 = other_brick.position.1 + square_radius,
-            Direction::Down => self.position.1 = other_brick.position.1 - square_radius,
-            Direction::Left => self.position.0 = other_brick.position.0 - square_radius,
-            Direction::Right => self.position.0 = other_brick.position.0 + square_radius,
-        }
-    }
-
-    pub fn from_right_coordinate(size: u32, right_position: (usize, usize, usize)) -> Brick {
+    pub fn from_right_coordinate(
+        size: u32,
+        min_size: u32,
+        right_position: (usize, usize, usize),
+    ) -> Brick {
         let x = right_to_center_coord(right_position.0, size);
         let y = right_to_center_coord(right_position.1, size);
         let floored = right_position.2 == size as usize;
 
         Brick {
             position: (
-                (x / 2.0) - (size as f32 / 4.0),
-                (y / 2.0) - (size as f32 / 4.0),
+                (x / 2.0) - (min_size as f32 / 4.0),
+                (y / 2.0) - (min_size as f32 / 4.0),
                 (right_position.2 as f32 / 2.0) - (size as f32 / 4.0),
             ),
             size,
@@ -184,44 +176,11 @@ mod tests {
         for i in 1..=size {
             bricks.push(Brick::from_right_coordinate(
                 size,
+                size,
                 (size as usize, size as usize, size as usize * i as usize),
             ));
         }
         let expected = include_str!("../assets/brick_comparisons/4xCubesTower.bls").to_string();
-        let actual = to_save_file_output(&bricks);
-
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn place_3x3_4x_cubes() {
-        let mut bricks = vec![Brick::new(4)];
-        let cross_direction_order = vec![
-            Direction::Left,
-            Direction::Right,
-            Direction::Up,
-            Direction::Down,
-        ];
-
-        for direction in cross_direction_order {
-            let mut neighboring_brick = Brick::new(4);
-            neighboring_brick.next_to(direction, &bricks[0]);
-
-            bricks.push(neighboring_brick);
-        }
-
-        let corner_direction_order = vec![Direction::Left, Direction::Right];
-        let top_and_bottom_bricks = bricks.iter().skip(3).cloned().collect::<Vec<Brick>>();
-        for brick in top_and_bottom_bricks {
-            for direction in &corner_direction_order {
-                let mut neighboring_brick = Brick::new(4);
-                neighboring_brick.next_to(*direction, &brick);
-
-                bricks.push(neighboring_brick);
-            }
-        }
-
-        let expected = include_str!("../assets/brick_comparisons/4xCubes.bls").to_string();
         let actual = to_save_file_output(&bricks);
 
         assert_eq!(expected, actual);
@@ -239,6 +198,7 @@ mod tests {
         for y_coord in desired_y_coordinates {
             bricks.push(Brick::from_right_coordinate(
                 size,
+                size,
                 (desired_x_coordinate, y_coord, desired_z_coordinate),
             ));
         }
@@ -250,9 +210,159 @@ mod tests {
     }
 
     #[test]
+    fn place_4_8_cube() {
+        let min_size = 4;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(4, min_size, (4, 4, 4)),
+            Brick::from_right_coordinate(8, min_size, (12, 8, 8)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/4-8Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_4_16_cube() {
+        let min_size = 4;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(4, min_size, (4, 4, 4)),
+            Brick::from_right_coordinate(16, min_size, (20, 16, 16)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/4-16Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_4_32_cube() {
+        let min_size = 4;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(4, min_size, (4, 4, 4)),
+            Brick::from_right_coordinate(32, min_size, (36, 32, 32)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/4-32Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_4_64_cube() {
+        let min_size = 4;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(4, min_size, (4, 4, 4)),
+            Brick::from_right_coordinate(64, min_size, (68, 64, 64)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/4-64Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
     fn place_one_8x_cube() {
         let expected = include_str!("../assets/brick_comparisons/8xCube.bls").to_string();
         let actual = to_save_file_output(&vec![Brick::new(8)]);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_8_16_cube() {
+        let min_size = 8;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(8, min_size, (8, 8, 8)),
+            Brick::from_right_coordinate(16, min_size, (24, 16, 16)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/8-16Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_8_32_cube() {
+        let min_size = 8;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(8, min_size, (8, 8, 8)),
+            Brick::from_right_coordinate(32, min_size, (40, 32, 32)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/8-32Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_8_64_cube() {
+        let min_size = 8;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(8, min_size, (8, 8, 8)),
+            Brick::from_right_coordinate(64, min_size, (72, 64, 64)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/8-64Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_16_32_cube() {
+        let min_size = 16;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(16, min_size, (16, 16, 16)),
+            Brick::from_right_coordinate(32, min_size, (48, 32, 32)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/16-32Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_16_64_cube() {
+        let min_size = 16;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(16, min_size, (16, 16, 16)),
+            Brick::from_right_coordinate(64, min_size, (80, 64, 64)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/16-64Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_32_64_cube() {
+        let min_size = 32;
+
+        let bricks = vec![
+            Brick::from_right_coordinate(32, min_size, (32, 32, 32)),
+            Brick::from_right_coordinate(64, min_size, (96, 64, 64)),
+        ];
+
+        let expected = include_str!("../assets/brick_comparisons/32-64Cube.bls").to_string();
+        let actual = to_save_file_output(&bricks);
 
         assert_eq!(expected, actual);
     }
@@ -268,6 +378,7 @@ mod tests {
         let mut bricks = Vec::new();
         for y_coord in desired_y_coordinates {
             bricks.push(Brick::from_right_coordinate(
+                size,
                 size,
                 (desired_x_coordinate, y_coord, desired_z_coordinate),
             ));
@@ -286,6 +397,7 @@ mod tests {
         let mut bricks = Vec::new();
         for i in 1..=4 {
             bricks.push(Brick::from_right_coordinate(
+                size,
                 size,
                 (size as usize, size as usize, size as usize * i as usize),
             ));
@@ -316,6 +428,7 @@ mod tests {
         for y_coord in desired_y_coordinates {
             bricks.push(Brick::from_right_coordinate(
                 size,
+                size,
                 (desired_x_coordinate, y_coord, desired_z_coordinate),
             ));
         }
@@ -333,6 +446,7 @@ mod tests {
         let mut bricks = Vec::new();
         for i in 1..=4 {
             bricks.push(Brick::from_right_coordinate(
+                size,
                 size,
                 (size as usize, size as usize, size as usize * i as usize),
             ));
@@ -363,6 +477,7 @@ mod tests {
         for y_coord in desired_y_coordinates {
             bricks.push(Brick::from_right_coordinate(
                 size,
+                size,
                 (desired_x_coordinate, y_coord, desired_z_coordinate),
             ));
         }
@@ -380,6 +495,7 @@ mod tests {
         let mut bricks = Vec::new();
         for i in 1..=4 {
             bricks.push(Brick::from_right_coordinate(
+                size,
                 size,
                 (size as usize, size as usize, size as usize * i as usize),
             ));
@@ -410,6 +526,7 @@ mod tests {
         for y_coord in desired_y_coordinates {
             bricks.push(Brick::from_right_coordinate(
                 size,
+                size,
                 (desired_x_coordinate, y_coord, desired_z_coordinate),
             ));
         }
@@ -428,6 +545,7 @@ mod tests {
         for i in 1..=4 {
             bricks.push(Brick::from_right_coordinate(
                 size,
+                size,
                 (size as usize, size as usize, size as usize * i as usize),
             ));
         }
@@ -441,12 +559,13 @@ mod tests {
     fn place_increasing_cubes_scale() {
         let expected = include_str!("../assets/brick_comparisons/CubeScale.bls").to_string();
 
+        let min_size = 4;
         let bricks = vec![
-            Brick::from_right_coordinate(4, (4, 4, 4)),
-            Brick::from_right_coordinate(8, (12, 8, 8)),
-            Brick::from_right_coordinate(16, (28, 16, 16)),
-            Brick::from_right_coordinate(32, (60, 32, 32)),
-            Brick::from_right_coordinate(64, (124, 64, 64)),
+            Brick::from_right_coordinate(4, min_size, (4, 4, 4)),
+            Brick::from_right_coordinate(8, min_size, (12, 8, 8)),
+            Brick::from_right_coordinate(16, min_size, (28, 16, 16)),
+            Brick::from_right_coordinate(32, min_size, (60, 32, 32)),
+            Brick::from_right_coordinate(64, min_size, (124, 64, 64)),
         ];
         let actual = to_save_file_output(&bricks);
 

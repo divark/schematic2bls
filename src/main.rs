@@ -46,6 +46,7 @@ fn main() {
     for i in 1..=size {
         bricks.push(Brick::from_right_coordinate(
             size,
+            size,
             (size as usize, size as usize, size as usize * i as usize),
         ));
     }
