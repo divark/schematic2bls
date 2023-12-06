@@ -46,16 +46,16 @@ fn main() {
     // let largest_cubes = grid_to_largest_cubes(three_dimensional_grid);
 
     // let mut bricks = Vec::new();
-    let size = 8;
+    // let size = 8;
 
-    let mut bricks = Vec::new();
-    for i in 1..=size {
-        bricks.push(Brick::from_right_coordinate(
-            size,
-            size,
-            (size as usize, size as usize, size as usize * i as usize),
-        ));
-    }
+    // let mut bricks = Vec::new();
+    // for i in 1..=size {
+    //     bricks.push(Brick::calculate_right_offset(
+    //         size,
+    //         size,
+    //         (size as usize, size as usize, size as usize * i as usize),
+    //     ));
+    // }
     // while let Some(found_largest_cube) = get_largest_cube(&largest_cubes) {
     //     let parsed_brick = Brick::from_right_coordinate(
     //         found_largest_cube.side_length as u32,
@@ -64,9 +64,9 @@ fn main() {
     //     bricks.push(parsed_brick);
     // }
 
-    let save_file_contents = to_save_file_output(&bricks);
+    // let save_file_contents = to_save_file_output(&bricks);
 
-    println!("{}", save_file_contents);
+    // println!("{}", save_file_contents);
 
     // let mut output_file_name = String::from(
     //     file_path
