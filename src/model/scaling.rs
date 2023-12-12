@@ -3,7 +3,7 @@ fn scale_start_idx(idx: usize, scale: usize) -> usize {
 }
 
 fn scale_copy(
-    scaled_up_grid: &mut Vec<Vec<Vec<bool>>>,
+    scaled_up_grid: &mut [Vec<Vec<bool>>],
     entry_indices: (usize, usize, usize),
     scale: usize,
 ) {

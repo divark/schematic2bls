@@ -1,6 +1,6 @@
 use super::LargestCube;
 
-fn get_largest_cube(largest_cube_grid: &[Vec<Vec<usize>>]) -> Option<LargestCube> {
+pub fn get_largest_cube(largest_cube_grid: &[Vec<Vec<usize>>]) -> Option<LargestCube> {
     let mut largest_entry_found = 0;
     let (mut i, mut j, mut k) = (0, 0, 0);
 

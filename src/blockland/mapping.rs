@@ -5,15 +5,15 @@ pub struct BrickBuilder {
 }
 
 impl BrickBuilder {
-    fn new() -> Self {
+    pub fn new() -> Self {
         BrickBuilder { bricks: Vec::new() }
     }
 
-    fn with_brick(&mut self, brick: Brick) {
+    pub fn with_brick(&mut self, brick: Brick) {
         self.bricks.push(brick);
     }
 
-    fn build(&self) -> Vec<Brick> {
+    pub fn build(&self) -> Vec<Brick> {
         let mut adjusted_coordinate_bricks = Vec::new();
         let min_size = self.bricks[0].size;
 
@@ -51,7 +51,7 @@ impl Brick {
             position: (
                 (x / 2.0) - (min_size as f32 / 4.0),
                 (y / 2.0) - (min_size as f32 / 4.0),
-                (self.position.2 as f32 / 2.0) - (self.size as f32 / 4.0),
+                (self.position.2 / 2.0) - (self.size as f32 / 4.0),
             ),
             size: self.size,
             floored,
