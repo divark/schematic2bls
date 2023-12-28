@@ -41,7 +41,8 @@ mod tests {
     use std::io::Cursor;
 
     fn load_test_schematic() -> CompoundTag {
-        let mut file_cursor = Cursor::new(include_bytes!("../../assets/peachs_castle.schematic").to_vec());
+        let mut file_cursor =
+            Cursor::new(include_bytes!("../../assets/peachs_castle.schematic").to_vec());
         read_gzip_compound_tag(&mut file_cursor).expect("Could not read given schematic file.")
     }
 
