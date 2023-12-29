@@ -2,7 +2,7 @@ use super::LargestCube;
 
 pub struct BinaryIndexHeap {
     pub max_idx_heap: Vec<(usize, usize, usize)>,
-    pub visited: Vec<bool>,
+    pub visited: Vec<Vec<Vec<bool>>>,
     pub node_data: Vec<Vec<Vec<usize>>>,
 }
 
@@ -12,7 +12,10 @@ impl BinaryIndexHeap {
 
         let mut index_max_heap = BinaryIndexHeap {
             max_idx_heap: Vec::new(),
-            visited: Vec::new(),
+            visited: vec![
+                vec![vec![false; node_data[0][0].len()]; node_data[0].len()];
+                node_data.len()
+            ],
             node_data: Vec::new(),
         };
 
@@ -48,7 +51,7 @@ impl BinaryIndexHeap {
             let parent_idx = self.max_idx_heap[parent_heap_idx];
             let parent_data = self.node_data[parent_idx.0][parent_idx.1][parent_idx.2];
 
-            if current_data <= parent_data {
+            if parent_data >= current_data {
                 break;
             }
 
@@ -99,7 +102,6 @@ impl BinaryIndexHeap {
                 let right_data = self.node_data[right_idx.0][right_idx.1][right_idx.2];
 
                 if right_data > max_data {
-                    max_data = right_data;
                     max_heap_idx = right_heap_idx;
                     max_idx = *right_idx;
                 }
