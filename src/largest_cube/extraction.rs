@@ -16,7 +16,7 @@ impl BinaryIndexHeap {
                 vec![vec![false; node_data[0][0].len()]; node_data[0].len()];
                 node_data.len()
             ],
-            node_data: Vec::new(),
+            node_data: node_data.clone(),
         };
 
         for (i, row_data) in node_data.iter().enumerate() {
@@ -27,15 +27,13 @@ impl BinaryIndexHeap {
             }
         }
 
-        index_max_heap.node_data = node_data;
-
         index_max_heap
     }
 
     pub fn push(&mut self, index: (usize, usize, usize)) {
         self.max_idx_heap.push(index);
 
-        if self.max_idx_heap.len() == 1 {
+        if self.max_idx_heap.len() <= 1 {
             return;
         }
 
@@ -73,6 +71,10 @@ impl BinaryIndexHeap {
         let max_value = self.max_idx_heap[0];
         self.max_idx_heap[0] = self.max_idx_heap[self.max_idx_heap.len() - 1];
         self.max_idx_heap.pop();
+
+        if self.max_idx_heap.is_empty() {
+            return Some(max_value);
+        }
 
         // We still want to preserve the max heap, even when removing the root.
         // This segment is the inverse of heapify-up, where we want to shift down the newest
@@ -119,42 +121,52 @@ impl BinaryIndexHeap {
 
         Some(max_value)
     }
+
+    pub fn has_visited(&self, idx: (usize, usize, usize)) -> bool {
+        let (i, j, k) = idx;
+
+        self.visited[i][j][k]
+    }
+
+    pub fn get_data(&self, idx: (usize, usize, usize)) -> usize {
+        let (i, j, k) = idx;
+
+        self.node_data[i][j][k]
+    }
 }
 
-pub fn get_largest_cube(largest_cube_grid: &[Vec<Vec<usize>>]) -> Option<LargestCube> {
-    let mut largest_entry_found = 0;
-    let (mut i, mut j, mut k) = (0, 0, 0);
+pub fn get_largest_cubes(largest_cube_grid: Vec<Vec<Vec<usize>>>) -> Vec<LargestCube> {
+    let mut largest_cubes = Vec::new();
 
-    for (length_idx, length_entry) in largest_cube_grid.iter().enumerate() {
-        for (width_idx, width_entry) in length_entry.iter().enumerate() {
-            for (entry_idx, entry) in width_entry.iter().enumerate() {
-                if *entry > largest_entry_found {
-                    largest_entry_found = *entry;
-
-                    i = length_idx;
-                    j = width_idx;
-                    k = entry_idx;
-                }
-            }
+    let mut max_heap = BinaryIndexHeap::from(largest_cube_grid);
+    while let Some(idx_3d) = max_heap.pop() {
+        if max_heap.has_visited(idx_3d) {
+            continue;
         }
+
+        let largest_cube_size = max_heap.get_data(idx_3d);
+        if largest_cube_size == 0 {
+            continue;
+        }
+
+        let largest_cube = LargestCube {
+            side_length: largest_cube_size.clamp(2, 64),
+            indexes: idx_3d,
+        };
+
+        mark_visited_from(&largest_cube, &mut max_heap);
+        largest_cubes.push(largest_cube);
     }
 
-    if largest_entry_found == 0 {
-        return None;
-    }
-
-    Some(LargestCube {
-        side_length: largest_entry_found,
-        indexes: (i, j, k),
-    })
+    largest_cubes
 }
 
-pub fn clear_largest_cube_from(largest_cube: &LargestCube, grid: &mut [Vec<Vec<usize>>]) {
-    let start_i = (largest_cube.indexes.0 - largest_cube.side_length) + 1;
-    let start_j = (largest_cube.indexes.1 - largest_cube.side_length) + 1;
-    let start_k = (largest_cube.indexes.2 - largest_cube.side_length) + 1;
+pub fn mark_visited_from(largest_cube: &LargestCube, max_heap: &mut BinaryIndexHeap) {
+    let start_i = largest_cube.indexes.0 + 1 - largest_cube.side_length;
+    let start_j = largest_cube.indexes.1 + 1 - largest_cube.side_length;
+    let start_k = largest_cube.indexes.2 + 1 - largest_cube.side_length;
 
-    for length_entry in grid
+    for length_entry in max_heap.visited
         .iter_mut()
         .skip(start_i)
         .take(largest_cube.indexes.0 + 1)
@@ -169,7 +181,7 @@ pub fn clear_largest_cube_from(largest_cube: &LargestCube, grid: &mut [Vec<Vec<u
                 .skip(start_k)
                 .take(largest_cube.indexes.2 + 1)
             {
-                *height_entry = 0;
+                *height_entry = true;
             }
         }
     }

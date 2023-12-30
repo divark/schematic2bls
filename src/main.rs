@@ -6,7 +6,7 @@ use std::{
 
 use blockland::{mapping::BrickBuilder, save_file::to_save_file_output, Brick};
 use largest_cube::{
-    extraction::{clear_largest_cube_from, get_largest_cube},
+    extraction::get_largest_cubes,
     mapping::grid_to_largest_cubes,
     LargestCube,
 };
@@ -35,21 +35,9 @@ fn scale_up_grid(scaling_factor: u8, voxel_grid: Vec<Vec<Vec<bool>>>) -> Vec<Vec
 }
 
 fn extract_largest_cubes_from(voxel_grid: Vec<Vec<Vec<bool>>>) -> Vec<LargestCube> {
-    let mut largest_cubes_grid = grid_to_largest_cubes(voxel_grid);
+    let largest_cubes_grid = grid_to_largest_cubes(voxel_grid);
 
-    let mut largest_cubes: Vec<LargestCube> = Vec::new();
-    while let Some(largest_cube) = get_largest_cube(&largest_cubes_grid) {
-        let mut bounded_largest_cube = largest_cube.clone();
-
-        bounded_largest_cube.side_length = bounded_largest_cube.side_length.clamp(2, 64);
-        bounded_largest_cube.side_length =
-            usize::pow(2, f32::log2(bounded_largest_cube.side_length as f32) as u32);
-
-        clear_largest_cube_from(&bounded_largest_cube, &mut largest_cubes_grid);
-        largest_cubes.push(bounded_largest_cube);
-    }
-
-    largest_cubes
+    get_largest_cubes(largest_cubes_grid)
 }
 
 fn extract_bricks_from(largest_cubes: Vec<LargestCube>) -> Vec<Brick> {
