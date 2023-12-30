@@ -55,9 +55,9 @@ fn main() {
     let execution_args: Vec<String> = env::args().collect();
     let model_arg = String::from("assets/peachs_castle.schematic");
     let scaling_factor = if let Some(scaling_arg) = execution_args.get(2) {
-        scaling_arg.parse::<u8>().unwrap_or(2)
+        scaling_arg.parse::<u8>().unwrap_or(4)
     } else {
-        2
+        4
     };
 
     let model = load_schematic(&model_arg);
