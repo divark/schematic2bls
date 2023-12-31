@@ -9,38 +9,44 @@ pub struct BinaryIndexHeap {
 impl BinaryIndexHeap {
     pub fn from(grid: Vec<Vec<Vec<usize>>>) -> BinaryIndexHeap {
         let node_data = grid;
-
-        let mut index_max_heap = BinaryIndexHeap {
-            max_idx_heap: Vec::new(),
-            visited: vec![
-                vec![vec![false; node_data[0][0].len()]; node_data[0].len()];
-                node_data.len()
-            ],
-            node_data: node_data.clone(),
-        };
+        let mut max_idx_heap = Vec::new();
 
         for (i, row_data) in node_data.iter().enumerate() {
             for (j, col_data) in row_data.iter().enumerate() {
                 for (k, _depth_data) in col_data.iter().enumerate() {
-                    index_max_heap.push((i, j, k));
+                    if node_data[i][j][k] == 0 {
+                        continue;
+                    }
+
+                    max_idx_heap.push((i, j, k));
                 }
             }
         }
 
+        let mut index_max_heap = BinaryIndexHeap {
+            max_idx_heap,
+            visited: vec![
+                vec![vec![false; node_data[0][0].len()]; node_data[0].len()];
+                node_data.len()
+            ],
+            node_data,
+        };
+
+        index_max_heap.heapsort();
         index_max_heap
     }
 
-    pub fn push(&mut self, index: (usize, usize, usize)) {
-        self.max_idx_heap.push(index);
-
-        if self.max_idx_heap.len() <= 1 {
-            return;
+    fn heapsort(&mut self) {
+        for size in 1..=self.max_idx_heap.len() {
+            self.heapify_up(size);
         }
+    }
 
+    fn heapify_up(&mut self, size: usize) {
         // To preserve the max heap, we have to bubble up the new
         // index until it reaches a point where everything above it
         // is bigger than it. This is considered heapify-up.
-        let mut current_heap_idx = self.max_idx_heap.len() - 1;
+        let mut current_heap_idx = size - 1;
         while current_heap_idx != 0 {
             let current_idx = self.max_idx_heap[current_heap_idx];
             let current_data = self.node_data[current_idx.0][current_idx.1][current_idx.2];
@@ -59,6 +65,16 @@ impl BinaryIndexHeap {
 
             current_heap_idx = parent_heap_idx;
         }
+    }
+
+    pub fn push(&mut self, index: (usize, usize, usize)) {
+        self.max_idx_heap.push(index);
+
+        if self.max_idx_heap.len() <= 1 {
+            return;
+        }
+
+        self.heapify_up(self.max_idx_heap.len());
     }
 
     pub fn pop(&mut self) -> Option<(usize, usize, usize)> {
@@ -172,7 +188,8 @@ pub fn mark_visited_from(largest_cube: &LargestCube, max_heap: &mut BinaryIndexH
     let start_j = largest_cube.indexes.1 + 1 - largest_cube.side_length;
     let start_k = largest_cube.indexes.2 + 1 - largest_cube.side_length;
 
-    for length_entry in max_heap.visited
+    for length_entry in max_heap
+        .visited
         .iter_mut()
         .skip(start_i)
         .take(largest_cube.indexes.0 + 1)

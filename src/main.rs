@@ -5,11 +5,7 @@ use std::{
 };
 
 use blockland::{mapping::BrickBuilder, save_file::to_save_file_output, Brick};
-use largest_cube::{
-    extraction::get_largest_cubes,
-    mapping::grid_to_largest_cubes,
-    LargestCube,
-};
+use largest_cube::{extraction::get_largest_cubes, mapping::grid_to_largest_cubes, LargestCube};
 use model::{conversion::schematic_to_3dgrid, scaling::scale_grid};
 use nbt::{decode::read_gzip_compound_tag, CompoundTag};
 
