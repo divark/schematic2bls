@@ -1,34 +1,33 @@
 use super::LargestCube;
+use std::collections::{BTreeMap, BTreeSet};
 
 pub struct BinaryIndexHeap {
     pub max_idx_heap: Vec<(usize, usize, usize)>,
-    pub visited: Vec<Vec<Vec<bool>>>,
-    pub node_data: Vec<Vec<Vec<usize>>>,
+    pub visited: BTreeSet<(usize, usize, usize)>,
+    pub node_data: BTreeMap<(usize, usize, usize), usize>,
 }
 
 impl BinaryIndexHeap {
     pub fn from(grid: Vec<Vec<Vec<usize>>>) -> BinaryIndexHeap {
-        let node_data = grid;
+        let mut node_data = BTreeMap::new();
         let mut max_idx_heap = Vec::new();
 
-        for (i, row_data) in node_data.iter().enumerate() {
+        for (i, row_data) in grid.iter().enumerate() {
             for (j, col_data) in row_data.iter().enumerate() {
                 for (k, _depth_data) in col_data.iter().enumerate() {
-                    if node_data[i][j][k] == 0 {
+                    if grid[i][j][k] == 0 {
                         continue;
                     }
 
                     max_idx_heap.push((i, j, k));
+                    node_data.insert((i, j, k), grid[i][j][k]);
                 }
             }
         }
 
         let mut index_max_heap = BinaryIndexHeap {
             max_idx_heap,
-            visited: vec![
-                vec![vec![false; node_data[0][0].len()]; node_data[0].len()];
-                node_data.len()
-            ],
+            visited: BTreeSet::new(),
             node_data,
         };
 
@@ -49,11 +48,11 @@ impl BinaryIndexHeap {
         let mut current_heap_idx = size - 1;
         while current_heap_idx != 0 {
             let current_idx = self.max_idx_heap[current_heap_idx];
-            let current_data = self.node_data[current_idx.0][current_idx.1][current_idx.2];
+            let current_data = self.get_data((current_idx.0, current_idx.1, current_idx.2));
 
             let parent_heap_idx = (current_heap_idx - 1) / 2;
             let parent_idx = self.max_idx_heap[parent_heap_idx];
-            let parent_data = self.node_data[parent_idx.0][parent_idx.1][parent_idx.2];
+            let parent_data = self.get_data((parent_idx.0, parent_idx.1, parent_idx.2));
 
             if parent_data >= current_data {
                 break;
@@ -98,7 +97,7 @@ impl BinaryIndexHeap {
         let mut current_heap_idx = 0;
         loop {
             let current_idx = self.max_idx_heap[current_heap_idx];
-            let current_data = self.node_data[current_idx.0][current_idx.1][current_idx.2];
+            let current_data = self.get_data((current_idx.0, current_idx.1, current_idx.2));
 
             let left_heap_idx = (2 * current_heap_idx) + 1;
             let right_heap_idx = (2 * current_heap_idx) + 2;
@@ -107,7 +106,7 @@ impl BinaryIndexHeap {
             let mut max_heap_idx = current_heap_idx;
             let mut max_idx = current_idx;
             if let Some(left_idx) = self.max_idx_heap.get(left_heap_idx) {
-                let left_data = self.node_data[left_idx.0][left_idx.1][left_idx.2];
+                let left_data = self.get_data((left_idx.0, left_idx.1, left_idx.2));
 
                 if left_data > max_data {
                     max_data = left_data;
@@ -117,7 +116,7 @@ impl BinaryIndexHeap {
             }
 
             if let Some(right_idx) = self.max_idx_heap.get(right_heap_idx) {
-                let right_data = self.node_data[right_idx.0][right_idx.1][right_idx.2];
+                let right_data = self.get_data((right_idx.0, right_idx.1, right_idx.2));
 
                 if right_data > max_data {
                     max_heap_idx = right_heap_idx;
@@ -139,15 +138,11 @@ impl BinaryIndexHeap {
     }
 
     pub fn has_visited(&self, idx: (usize, usize, usize)) -> bool {
-        let (i, j, k) = idx;
-
-        self.visited[i][j][k]
+        self.visited.contains(&idx)
     }
 
     pub fn get_data(&self, idx: (usize, usize, usize)) -> usize {
-        let (i, j, k) = idx;
-
-        self.node_data[i][j][k]
+        *self.node_data.get(&idx).unwrap()
     }
 }
 
@@ -188,23 +183,10 @@ pub fn mark_visited_from(largest_cube: &LargestCube, max_heap: &mut BinaryIndexH
     let start_j = largest_cube.indexes.1 + 1 - largest_cube.side_length;
     let start_k = largest_cube.indexes.2 + 1 - largest_cube.side_length;
 
-    for length_entry in max_heap
-        .visited
-        .iter_mut()
-        .skip(start_i)
-        .take(largest_cube.indexes.0 + 1)
-    {
-        for width_entry in length_entry
-            .iter_mut()
-            .skip(start_j)
-            .take(largest_cube.indexes.1 + 1)
-        {
-            for height_entry in width_entry
-                .iter_mut()
-                .skip(start_k)
-                .take(largest_cube.indexes.2 + 1)
-            {
-                *height_entry = true;
+    for i in largest_cube.indexes.0..=start_i {
+        for j in largest_cube.indexes.1..=start_j {
+            for k in largest_cube.indexes.2..=start_k {
+                max_heap.visited.insert((i, j, k));
             }
         }
     }
