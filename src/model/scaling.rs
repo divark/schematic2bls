@@ -11,10 +11,10 @@ fn scale_copy(
     let scaled_y = scale_start_idx(entry_indices.1, scale);
     let scaled_z = scale_start_idx(entry_indices.2, scale);
 
-    for row in scaled_up_grid.iter_mut().skip(scaled_x).take(scale) {
-        for col in row.iter_mut().skip(scaled_y).take(scale) {
-            for entry in col.iter_mut().skip(scaled_z).take(scale) {
-                *entry = true;
+    for i in scaled_x..scaled_x + scale {
+        for j in scaled_y..scaled_y + scale {
+            for k in scaled_z..scaled_z + scale {
+                scaled_up_grid[i][j][k] = true;
             }
         }
     }

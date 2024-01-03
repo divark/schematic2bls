@@ -1,23 +1,97 @@
-pub fn grid_to_largest_cubes(grid: Vec<Vec<Vec<bool>>>) -> Vec<Vec<Vec<usize>>> {
+#[derive(Clone)]
+pub struct GridSizes {
+    pub x_len: usize,
+    pub y_len: usize,
+    pub z_len: usize,
+}
+
+pub struct GridReader {
+    sizes: GridSizes,
+    grid: Vec<usize>,
+}
+
+pub fn idx_1d_from(x: usize, y: usize, z: usize, sizes: &GridSizes) -> usize {
+    (z * sizes.x_len * sizes.y_len) + (y * sizes.x_len) + x
+}
+
+pub fn idx_3d_from(mut index_1d: usize, sizes: &GridSizes) -> (usize, usize, usize) {
+    let z = index_1d / (sizes.x_len * sizes.y_len);
+    index_1d -= z * sizes.x_len * sizes.y_len;
+    let y = index_1d / sizes.x_len;
+    let x = index_1d % sizes.x_len;
+
+    (x, y, z)
+}
+
+impl GridReader {
+    pub fn new(length: usize, width: usize, height: usize) -> GridReader {
+        GridReader {
+            sizes: GridSizes {
+                x_len: length,
+                y_len: width,
+                z_len: height,
+            },
+            grid: vec![0; length * width * height],
+        }
+    }
+
+    pub fn length(&self) -> usize {
+        self.sizes.x_len
+    }
+
+    pub fn width(&self) -> usize {
+        self.sizes.y_len
+    }
+
+    pub fn height(&self) -> usize {
+        self.sizes.z_len
+    }
+
+    pub fn size(&self) -> &GridSizes {
+        &self.sizes
+    }
+
+    pub fn size_cloned(&self) -> GridSizes {
+        self.sizes.clone()
+    }
+
+    pub fn idx_1d_from(&self, i: usize, j: usize, k: usize) -> usize {
+        idx_1d_from(i, j, k, self.size())
+    }
+
+    pub fn get(&self, i: usize, j: usize, k: usize) -> usize {
+        let idx = self.idx_1d_from(i, j, k);
+        *self.grid.get(idx).unwrap()
+    }
+
+    pub fn get_mut(&mut self, i: usize, j: usize, k: usize) -> Option<&mut usize> {
+        let idx = self.idx_1d_from(i, j, k);
+        self.grid.get_mut(idx)
+    }
+}
+
+pub fn grid_to_largest_cubes(grid: Vec<Vec<Vec<bool>>>) -> GridReader {
     let length = grid.len();
     let width = grid[0].len();
     let height = grid[0][0].len();
 
-    let mut largest_cube = vec![vec![vec![0; height + 1]; width + 1]; length + 1];
+    let mut largest_cube = GridReader::new(length + 1, width + 1, height + 1);
 
     for i in 1..=length {
         for j in 1..=width {
             for k in 1..=height {
                 if grid[i - 1][j - 1][k - 1] {
-                    let smallest_prior_cube = largest_cube[i][j][k - 1]
-                        .min(largest_cube[i][j - 1][k - 1])
-                        .min(largest_cube[i - 1][j][k - 1])
-                        .min(largest_cube[i - 1][j - 1][k - 1])
-                        .min(largest_cube[i][j - 1][k])
-                        .min(largest_cube[i - 1][j - 1][k])
-                        .min(largest_cube[i - 1][j][k]);
+                    let smallest_prior_cube = largest_cube
+                        .get(i, j, k - 1)
+                        .min(largest_cube.get(i, j - 1, k - 1))
+                        .min(largest_cube.get(i - 1, j, k - 1))
+                        .min(largest_cube.get(i - 1, j - 1, k - 1))
+                        .min(largest_cube.get(i, j - 1, k))
+                        .min(largest_cube.get(i - 1, j - 1, k))
+                        .min(largest_cube.get(i - 1, j, k));
 
-                    largest_cube[i][j][k] = smallest_prior_cube + 1;
+                    let result = largest_cube.get_mut(i, j, k).unwrap();
+                    *result = smallest_prior_cube + 1;
                 }
             }
         }
