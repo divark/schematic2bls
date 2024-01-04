@@ -13,19 +13,13 @@ impl BinaryIndexHeap {
         let mut node_data = HashMap::new();
         let mut max_idx_heap = Vec::new();
 
-        for i in 0..grid.length() {
-            for j in 0..grid.width() {
-                for k in 0..grid.height() {
-                    let grid_item = grid.get(i, j, k);
-                    if grid_item == 0 {
-                        continue;
-                    }
-
-                    let grid_1d_idx = grid.idx_1d_from(i, j, k);
-                    max_idx_heap.push(grid_1d_idx);
-                    node_data.insert(grid_1d_idx, grid_item);
-                }
+        for (i, grid_item) in grid.data().iter().enumerate() {
+            if *grid_item == 0 {
+                continue;
             }
+
+            max_idx_heap.push(i);
+            node_data.insert(i, *grid_item);
         }
 
         let mut index_max_heap = BinaryIndexHeap {

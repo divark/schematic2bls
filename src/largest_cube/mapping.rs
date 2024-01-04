@@ -68,6 +68,10 @@ impl GridReader {
         let idx = self.idx_1d_from(i, j, k);
         self.grid.get_mut(idx)
     }
+
+    pub fn data(&self) -> &Vec<usize> {
+        &self.grid
+    }
 }
 
 pub fn grid_to_largest_cubes(grid: Vec<Vec<Vec<bool>>>) -> GridReader {
