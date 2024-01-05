@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 pub struct BinaryIndexHeap {
     pub max_idx_heap: Vec<usize>,
     pub visited: HashSet<usize>,
-    pub node_data: HashMap<usize, usize>,
+    pub node_data: HashMap<usize, u16>,
 }
 
 impl BinaryIndexHeap {
@@ -138,15 +138,15 @@ impl BinaryIndexHeap {
         self.visited.contains(&idx)
     }
 
-    pub fn get_data(&self, idx: usize) -> usize {
+    pub fn get_data(&self, idx: usize) -> u16 {
         *self.node_data.get(&idx).unwrap()
     }
 }
 
-fn nearest_power_of_two(side_length: usize) -> usize {
+fn nearest_power_of_two(side_length: u16) -> u16 {
     let power_of_two = f32::log2(side_length as f32).floor();
 
-    f32::powi(2.0, power_of_two as i32) as usize
+    f32::powi(2.0, power_of_two as i32) as u16
 }
 
 pub fn get_largest_cubes(largest_cube_grid: GridReader) -> Vec<LargestCube> {
@@ -182,9 +182,11 @@ pub fn mark_visited_from(
     sizes: &GridSizes,
     max_heap: &mut BinaryIndexHeap,
 ) {
-    let start_i = largest_cube.indexes.0 + 1 - largest_cube.side_length;
-    let start_j = largest_cube.indexes.1 + 1 - largest_cube.side_length;
-    let start_k = largest_cube.indexes.2 + 1 - largest_cube.side_length;
+    let side_length = largest_cube.side_length as usize;
+
+    let start_i = largest_cube.indexes.0 + 1 - side_length;
+    let start_j = largest_cube.indexes.1 + 1 - side_length;
+    let start_k = largest_cube.indexes.2 + 1 - side_length;
 
     for i in largest_cube.indexes.0..=start_i {
         for j in largest_cube.indexes.1..=start_j {

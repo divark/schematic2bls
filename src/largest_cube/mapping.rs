@@ -7,7 +7,7 @@ pub struct GridSizes {
 
 pub struct GridReader {
     sizes: GridSizes,
-    grid: Vec<usize>,
+    grid: Vec<u16>,
 }
 
 pub fn idx_1d_from(x: usize, y: usize, z: usize, sizes: &GridSizes) -> usize {
@@ -59,17 +59,17 @@ impl GridReader {
         idx_1d_from(i, j, k, self.size())
     }
 
-    pub fn get(&self, i: usize, j: usize, k: usize) -> usize {
+    pub fn get(&self, i: usize, j: usize, k: usize) -> u16 {
         let idx = self.idx_1d_from(i, j, k);
         *self.grid.get(idx).unwrap()
     }
 
-    pub fn get_mut(&mut self, i: usize, j: usize, k: usize) -> Option<&mut usize> {
+    pub fn get_mut(&mut self, i: usize, j: usize, k: usize) -> Option<&mut u16> {
         let idx = self.idx_1d_from(i, j, k);
         self.grid.get_mut(idx)
     }
 
-    pub fn data(&self) -> &Vec<usize> {
+    pub fn data(&self) -> &Vec<u16> {
         &self.grid
     }
 }
