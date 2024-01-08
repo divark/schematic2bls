@@ -1,3 +1,4 @@
+use crate::largest_cube::mapping::{idx_3d_from, GridSizes};
 use nbt::CompoundTag;
 
 fn three_to_one_dim_idx(x: usize, y: usize, z: usize, length: usize, width: usize) -> usize {
@@ -20,14 +21,15 @@ pub fn schematic_to_3dgrid(schematic_root: CompoundTag) -> Vec<Vec<Vec<bool>>> {
     let blocks = schematic_root
         .get_i8_vec("Blocks")
         .expect("Could not get Blocks field in schematic.");
-    for i in 0..length {
-        for j in 0..width {
-            for k in 0..height {
-                let blocks_index = three_to_one_dim_idx(i, j, k, length, width);
+    let grid_size = GridSizes {
+        x_len: length,
+        y_len: width,
+        z_len: height,
+    };
 
-                grid[i][k][j] = blocks[blocks_index] == 1;
-            }
-        }
+    for (blocks_idx_1d, block_entry) in blocks.iter().enumerate() {
+        let (i, j, k) = idx_3d_from(blocks_idx_1d, &grid_size);
+        grid[i][k][j] = *block_entry == 1;
     }
 
     grid
