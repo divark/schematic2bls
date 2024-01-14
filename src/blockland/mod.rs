@@ -6,7 +6,7 @@ use std::fmt::Display;
 #[derive(Clone)]
 pub struct Brick {
     pub position: (f32, f32, f32),
-    pub size: u32,
+    pub size: u16,
     floored: bool,
 }
 

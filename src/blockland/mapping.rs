@@ -25,12 +25,12 @@ impl BrickBuilder {
     }
 }
 
-fn right_to_center_coord(right_coord: f32, size: u32) -> f32 {
+fn right_to_center_coord(right_coord: f32, size: u16) -> f32 {
     right_coord - (size as f32 / 2.0)
 }
 
 impl Brick {
-    pub fn new(right_xyz_coord: (usize, usize, usize), size: u32) -> Brick {
+    pub fn new(right_xyz_coord: (usize, usize, usize), size: u16) -> Brick {
         Brick {
             position: (
                 right_xyz_coord.0 as f32,
@@ -42,7 +42,7 @@ impl Brick {
         }
     }
 
-    fn calculate_right_offset(&self, min_size: u32) -> Brick {
+    fn calculate_right_offset(&self, min_size: u16) -> Brick {
         let x = right_to_center_coord(self.position.0, self.size);
         let y = right_to_center_coord(self.position.1, self.size);
         let floored = self.position.2 as usize == self.size as usize;
@@ -482,6 +482,24 @@ mod tests {
         brick_builder.with_brick(Brick::new((28, 16, 16), 16));
         brick_builder.with_brick(Brick::new((60, 32, 32), 32));
         brick_builder.with_brick(Brick::new((124, 64, 64), 64));
+
+        let actual = to_save_file_output(&brick_builder.build());
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_complete_increasing_cubes_scale() {
+        let expected = include_str!("../../assets/brick_comparisons/CubeScaleNew.bls").to_string();
+
+        let mut brick_builder = BrickBuilder::new();
+        brick_builder.with_brick(Brick::new((1, 1, 1), 1));
+        brick_builder.with_brick(Brick::new((3, 2, 2), 2));
+        brick_builder.with_brick(Brick::new((7, 4, 4), 4));
+        brick_builder.with_brick(Brick::new((15, 8, 8), 8));
+        brick_builder.with_brick(Brick::new((31, 16, 16), 16));
+        brick_builder.with_brick(Brick::new((63, 32, 32), 32));
+        brick_builder.with_brick(Brick::new((127, 64, 64), 64));
 
         let actual = to_save_file_output(&brick_builder.build());
 

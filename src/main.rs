@@ -40,7 +40,7 @@ fn extract_bricks_from(largest_cubes: Vec<LargestCube>) -> Vec<Brick> {
     let mut brick_builder = BrickBuilder::new();
 
     for largest_cube in largest_cubes {
-        let brick = Brick::new(largest_cube.indexes, largest_cube.side_length as u32);
+        let brick = Brick::new(largest_cube.indexes, largest_cube.side_length as u16);
         brick_builder.with_brick(brick);
     }
 
