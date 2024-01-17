@@ -39,6 +39,7 @@ impl Brick {
             ),
             size,
             floored: true,
+            bottom_1x_cube: false,
         }
     }
 
@@ -47,14 +48,29 @@ impl Brick {
         let y = right_to_center_coord(self.position.1, self.size);
         let floored = self.position.2 as usize == self.size as usize;
 
+        let min_size_offset = if min_size > 1 {
+            min_size as f32 / 4.0
+        } else {
+            0.0
+        };
+
+        let is_bottom_1x_cube = self.position.2 as usize % 2 != 0;
+
+        let size_offset = if self.size > 1 {
+            self.size as f32 / 4.0
+        } else {
+            0.3
+        };
+
         Brick {
             position: (
-                (x / 2.0) - (min_size as f32 / 4.0),
-                (y / 2.0) - (min_size as f32 / 4.0),
-                (self.position.2 / 2.0) - (self.size as f32 / 4.0),
+                (x / 2.0) - min_size_offset,
+                (y / 2.0) - min_size_offset,
+                (self.position.2 / 2.0) - size_offset,
             ),
             size: self.size,
             floored,
+            bottom_1x_cube: is_bottom_1x_cube,
         }
     }
 }
@@ -467,6 +483,23 @@ mod tests {
             ));
         }
         let expected = include_str!("../../assets/brick_comparisons/64xCubesTower.bls").to_string();
+        let actual = to_save_file_output(&brick_builder.build());
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn place_1x_cube_tower() {
+        let size = 1;
+
+        let mut brick_builder = BrickBuilder::new();
+        for i in 1..=4 {
+            brick_builder.with_brick(Brick::new(
+                (size as usize, size as usize, size as usize * i as usize),
+                size,
+            ));
+        }
+        let expected = include_str!("../../assets/brick_comparisons/1xCubesTower.bls").to_string();
         let actual = to_save_file_output(&brick_builder.build());
 
         assert_eq!(expected, actual);

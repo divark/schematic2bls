@@ -35,18 +35,6 @@ impl GridReader {
         }
     }
 
-    pub fn length(&self) -> usize {
-        self.sizes.x_len
-    }
-
-    pub fn width(&self) -> usize {
-        self.sizes.y_len
-    }
-
-    pub fn height(&self) -> usize {
-        self.sizes.z_len
-    }
-
     pub fn size(&self) -> &GridSizes {
         &self.sizes
     }

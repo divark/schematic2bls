@@ -166,7 +166,7 @@ pub fn get_largest_cubes(largest_cube_grid: GridReader) -> Vec<LargestCube> {
 
         let idx_3d = idx_3d_from(idx_1d, &sizes);
         let largest_cube = LargestCube {
-            side_length: nearest_power_of_two(largest_cube_size.clamp(2, 64)),
+            side_length: nearest_power_of_two(largest_cube_size.clamp(1, 64)),
             indexes: idx_3d,
         };
 
