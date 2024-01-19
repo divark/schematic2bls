@@ -49,7 +49,7 @@ fn extract_bricks_from(largest_cubes: Vec<LargestCube>) -> Vec<Brick> {
 
 fn main() {
     let execution_args: Vec<String> = env::args().collect();
-    let model_arg = String::from("assets/peachs_castle.schematic");
+    let model_arg = String::from("assets/peachs_castle_4.schematic");
     let scaling_factor = if let Some(scaling_arg) = execution_args.get(2) {
         scaling_arg.parse::<u8>().unwrap_or(1)
     } else {

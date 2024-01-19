@@ -51,7 +51,9 @@ impl BinaryIndexHeap {
             let parent_idx = self.max_idx_heap[parent_heap_idx];
             let parent_data = self.get_data(parent_idx);
 
-            if parent_data >= current_data {
+            if parent_data > current_data {
+                break;
+            } else if parent_data == current_data && parent_idx > current_idx {
                 break;
             }
 
@@ -105,7 +107,7 @@ impl BinaryIndexHeap {
             if let Some(left_idx) = self.max_idx_heap.get(left_heap_idx) {
                 let left_data = self.get_data(*left_idx);
 
-                if left_data > max_data {
+                if left_data > max_data || (left_data == max_data && left_heap_idx > max_heap_idx) {
                     max_data = left_data;
                     max_heap_idx = left_heap_idx;
                     max_idx = *left_idx;
@@ -115,7 +117,9 @@ impl BinaryIndexHeap {
             if let Some(right_idx) = self.max_idx_heap.get(right_heap_idx) {
                 let right_data = self.get_data(*right_idx);
 
-                if right_data > max_data {
+                if right_data > max_data
+                    || (right_data == max_data && right_heap_idx > max_heap_idx)
+                {
                     max_heap_idx = right_heap_idx;
                     max_idx = *right_idx;
                 }
