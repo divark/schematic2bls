@@ -1,0 +1,22 @@
+Spacing:
+	None.
+	Some.		[property Gaps]
+
+Amount:
+	Zero.		[single] [if !Gaps]
+	One.		[if !Gaps] [property one]
+	Two.		[if !Gaps]
+	Three.
+	Four.
+	Five.
+	Six.
+
+Placed:
+	Horizontal.	[if !one]
+	Vertical.	[if !one]
+	Diagonal.	[if !one]
+
+Type:
+	Same.		[if !one]
+	Different.	[if !one]
+
