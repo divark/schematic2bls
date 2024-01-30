@@ -40,7 +40,7 @@ mod tests {
 
     fn load_test_schematic() -> CompoundTag {
         let mut file_cursor =
-            Cursor::new(include_bytes!("../../assets/peachs_castle_8.schematic").to_vec());
+            Cursor::new(include_bytes!("../../assets/peachs_castle_4.schematic").to_vec());
         read_gzip_compound_tag(&mut file_cursor).expect("Could not read given schematic file.")
     }
 
