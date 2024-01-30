@@ -1,0 +1,31 @@
+Voxel Grid:
+- Next_Write_Pos: (0, 0, 0)
+- Grid: bool[x][y][z]
+
+Fn draw(direction, cube_length):
+For I in next_write_pos.x .. next_write_pos.x + cube_length
+For j in next_write_pos.y .. next_write_pos.y + cube_length
+For k in next_write_pos.z .. next_write_pos.z + cube_length
+grid[I][j][k] = true;
+
+Self.shift(direction, cube_length)
+
+Fn shift(direction, cube_length)
+If horizontal
+    next_write_pos.x += cube_length
+If vertical
+    next_write_pos.y += cube_length
+If diagonal
+    next_write_pos.z += cube_length
+------
+
+Let voxel_grid = grid_3d(length, width, height)
+voxel_grid.draw(horizontal/vertical/diagonal, cube_length)
+
+Let expected_cubes = [
+	largest_cube_1,
+	...
+];
+
+Let actual_cubes = extract_largest_cubes_from(voxel_grid.data);
+assert!(expected_cubes, actual_cubes);
