@@ -15,7 +15,7 @@ Schematic2BLS can be used during development as a CLI application. To use it, yo
 
 ## Steps
 1. Clone this repository via git, or download the ZIP file via clicking the Code button on GitHub.
-2. Download (Rust)[] if you have not already.
+2. Download [Rust](https://www.rust-lang.org/) if you have not already.
 3. Navigate to where you downloaded/unzipped the source code, and run `cargo build --release`.
 4. Navigate to the newly built executable under the directory `target/release`.
 5. Run the command `./schematic2bls <path_to_schematic> [scaling_factor]`, where
