@@ -1,5 +1,5 @@
 [package]
-name = "grid2bls"
+name = "schematic2bls"
 version = "0.1.0"
 edition = "2021"
 
