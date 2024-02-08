@@ -3,7 +3,7 @@ Schematic2BLS is an in-development tool used to convert a Minecraft schematic fi
 
 This tool was created to do a last attempt at finishing my [Mario 64 Project](https://www.youtube.com/watch?v=quJs0Zgsrjw) on Blockland by myself, with the goals of saving time, and applying what I have learned from my Computer Science major in university from undergrad to graduate school.
 
-# Caveats
+# Requirements
 As of the time of this writing, Schematic2BLS will only recognize Stone blocks in a .schematic file when reconstructing a model in Blockland.
 
 In addition, to render the result on Blockland, you will need to install two Add-Ons that add 2x and 1x Cubes respectively, which can be found here:
