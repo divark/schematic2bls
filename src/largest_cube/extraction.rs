@@ -165,7 +165,7 @@ pub fn get_largest_cubes(largest_cube_grid: GridReader) -> Vec<LargestCube> {
 
         let largest_cube_size = max_heap.get_data(idx_1d);
         if largest_cube_size == 0 {
-            continue;
+            break;
         }
 
         let idx_3d = idx_3d_from(idx_1d, &sizes);
@@ -188,13 +188,17 @@ pub fn mark_visited_from(
 ) {
     let side_length = largest_cube.side_length as usize;
 
-    let start_i = largest_cube.indexes.0 + 1 - side_length;
-    let start_j = largest_cube.indexes.1 + 1 - side_length;
-    let start_k = largest_cube.indexes.2 + 1 - side_length;
+    let x = largest_cube.indexes.0;
+    let y = largest_cube.indexes.1;
+    let z = largest_cube.indexes.2;
 
-    for i in largest_cube.indexes.0..=start_i {
-        for j in largest_cube.indexes.1..=start_j {
-            for k in largest_cube.indexes.2..=start_k {
+    let end_x = largest_cube.indexes.0 - side_length + 1;
+    let end_y = largest_cube.indexes.1 - side_length + 1;
+    let end_z = largest_cube.indexes.2 - side_length + 1;
+
+    for i in (end_x..=x).rev() {
+        for j in (end_y..=y).rev() {
+            for k in (end_z..=z).rev() {
                 let idx_1d = idx_1d_from(i, j, k, sizes);
                 max_heap.visited.insert(idx_1d);
             }
