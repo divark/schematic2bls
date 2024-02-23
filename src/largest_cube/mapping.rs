@@ -83,7 +83,6 @@ pub fn grid_to_largest_cubes(grid: Vec<Vec<Vec<bool>>>) -> GridReader {
                         .min(largest_cube.get(i - 1, j, k));
 
                     let result = largest_cube.get_mut(i, j, k).unwrap();
-                    assert!(*result != 4, "At position {}, {}, {}", i, j, k);
                     *result = smallest_prior_cube + 1;
                 }
             }
