@@ -13,8 +13,77 @@ impl BrickBuilder {
         self.bricks.push(brick);
     }
 
-    pub fn build(&self) -> Vec<Brick> {
+    /// Returns a collection of stacked bricks
+    /// as a set of indexes that are of size 1.
+    fn get_1x_cube_bundles(&self) -> Vec<Vec<usize>> {
+        let mut filtered_1x_bricks = self
+            .bricks
+            .iter()
+            .enumerate()
+            .filter(|brick_info| brick_info.1.size == 1)
+            .map(|brick_info| (brick_info.0, brick_info.1.position))
+            .collect::<Vec<(usize, (f32, f32, f32))>>();
+
+        filtered_1x_bricks.sort_unstable_by(|brick1, brick2| {
+            (brick1.1 .0 as usize)
+                .cmp(&(brick2.1 .0 as usize))
+                .then((brick1.1 .1 as usize).cmp(&(brick2.1 .1 as usize)))
+                .then((brick1.1 .2 as usize).cmp(&(brick2.1 .2 as usize)))
+        });
+
+        let mut bundles: Vec<Vec<usize>> = Vec::new();
+        let mut current_bundle: Vec<usize> = vec![0];
+
+        for (brick_number, brick_info) in filtered_1x_bricks.iter().enumerate() {
+            if brick_number == 0 {
+                continue;
+            }
+
+            let brick = &self.bricks[brick_info.0];
+            let previous_brick = &self.bricks[filtered_1x_bricks[brick_number - 1].0];
+
+            if brick.is_above(&previous_brick) {
+                current_bundle.push(brick_info.0);
+            } else {
+                bundles.push(current_bundle);
+                current_bundle = vec![brick_info.0];
+            }
+        }
+
+        bundles
+    }
+
+    /// Changes each Brick in the given bundles Brick sets
+    /// to either be labeled as the top or bottom of the
+    /// 1x Cube Type, dictated by assign_1x_cube_name.
+    fn map_1x_cube_bundles(&mut self, bundles: Vec<Vec<usize>>) {
+        for bundle in bundles {
+            self.assign_1x_cube_name(&bundle);
+        }
+    }
+
+    /// Sets whether a 1x Brick in the provided Cube Bundle
+    /// is the bottom or top half of the 1x Cube Type.
+    fn assign_1x_cube_name(&mut self, cube_bundle: &Vec<usize>) {
+        for (brick_number, brick_idx) in cube_bundle.iter().enumerate() {
+            let brick = &mut self.bricks[*brick_idx];
+
+            if brick_number % 2 != 0 {
+                brick.bottom_1x_cube = true;
+            } else {
+                brick.bottom_1x_cube = false;
+            }
+        }
+    }
+
+    pub fn build(&mut self) -> Vec<Brick> {
         let mut adjusted_coordinate_bricks = Vec::new();
+
+        // 1x Cubes are a special case since a 1x Cube
+        // actually comes in two parts for Blockland.
+        let cubes_1x_idxes = self.get_1x_cube_bundles();
+        self.map_1x_cube_bundles(cubes_1x_idxes);
+
         let min_size = self.bricks[0].size;
 
         for brick in &self.bricks {
@@ -54,8 +123,6 @@ impl Brick {
             0.0
         };
 
-        let is_bottom_1x_cube = self.position.2 as usize % 2 != 0;
-
         let size_offset = if self.size > 1 {
             self.size as f32 / 4.0
         } else {
@@ -70,8 +137,21 @@ impl Brick {
             ),
             size: self.size,
             floored,
-            bottom_1x_cube: is_bottom_1x_cube,
+            bottom_1x_cube: self.bottom_1x_cube,
         }
+    }
+
+    /// Returns whether this Brick is positioned
+    /// above the other Brick.
+    /// NOTE: This is only used before BrickBuilder
+    /// runs the build function.
+    fn is_above(&self, other: &Brick) -> bool {
+        let is_x_aligned = self.position.0 == other.position.0;
+        let is_y_aligned = self.position.1 == other.position.0;
+
+        let other_below = self.position.2 - other.position.2 == 1.0;
+
+        is_x_aligned && is_y_aligned && other_below
     }
 }
 
