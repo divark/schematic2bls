@@ -71,28 +71,60 @@ impl CubePainter {
     }
 }
 
+fn generate_grid_from(cube_sizes: &[usize], direction: Direction) -> Vec<Vec<Vec<bool>>> {
+    let mut cube_painter = CubePainter::new(&cube_sizes);
+    for cube_size in cube_sizes.iter() {
+        cube_painter.draw(direction, *cube_size);
+    }
+
+    cube_painter.to_grid()
+}
+
+fn get_expected_side_lengths_from(cube_sizes: &[usize]) -> Vec<usize> {
+    let mut expected_side_lengths = cube_sizes.iter().cloned().collect::<Vec<usize>>();
+    expected_side_lengths.sort_unstable();
+    expected_side_lengths.reverse();
+
+    expected_side_lengths
+}
+
+const BLOCKS_ONE: [usize; 1] = [1];
+const BLOCKS_TWO: [usize; 2] = [1, 2];
+const BLOCKS_THREE: [usize; 3] = [1, 2, 4];
+const BLOCKS_FOUR: [usize; 4] = [1, 2, 4, 8];
+const BLOCKS_FIVE: [usize; 5] = [1, 2, 4, 8, 16];
+const BLOCKS_SIX: [usize; 6] = [1, 2, 4, 8, 16, 32];
+
 //Test Case 1   		<single>
 #[test]
-fn case1() {}
+fn case1() {
+    let cube_sizes = Vec::new();
+    let direction = Direction::Horizontal;
+
+    let grid = generate_grid_from(&cube_sizes, direction);
+    let largest_cubes = extract_largest_cubes_from(grid);
+
+    let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
+    assert_eq!(largest_cubes.len(), expected_side_lengths.len());
+
+    for (idx, largest_cube) in largest_cubes.iter().enumerate() {
+        assert_eq!(
+            largest_cube.side_length as usize,
+            expected_side_lengths[idx]
+        );
+    }
+}
 
 //Test Case 2   		(Key = 1.2.0.0.)
 #[test]
 fn case2() {
-    let cube_sizes = [4];
+    let cube_sizes = BLOCKS_ONE;
     let direction = Direction::Horizontal;
 
-    let mut cube_painter = CubePainter::new(&cube_sizes);
-    for cube_size in &cube_sizes {
-        cube_painter.draw(direction, *cube_size);
-    }
-
-    let grid = cube_painter.to_grid();
+    let grid = generate_grid_from(&cube_sizes, direction);
     let largest_cubes = extract_largest_cubes_from(grid);
 
-    let mut expected_side_lengths = cube_sizes;
-    expected_side_lengths.sort_unstable();
-    expected_side_lengths.reverse();
-
+    let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
     assert_eq!(largest_cubes.len(), expected_side_lengths.len());
 
     for (idx, largest_cube) in largest_cubes.iter().enumerate() {
@@ -110,21 +142,13 @@ fn case3() {}
 //Test Case 4   		(Key = 1.3.1.2.)
 #[test]
 fn case4() {
-    let cube_sizes = [4, 8];
+    let cube_sizes = BLOCKS_TWO;
     let direction = Direction::Horizontal;
 
-    let mut cube_painter = CubePainter::new(&cube_sizes);
-    for cube_size in &cube_sizes {
-        cube_painter.draw(direction, *cube_size);
-    }
-
-    let grid = cube_painter.to_grid();
+    let grid = generate_grid_from(&cube_sizes, direction);
     let largest_cubes = extract_largest_cubes_from(grid);
 
-    let mut expected_side_lengths = cube_sizes;
-    expected_side_lengths.sort_unstable();
-    expected_side_lengths.reverse();
-
+    let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
     assert_eq!(largest_cubes.len(), expected_side_lengths.len());
 
     for (idx, largest_cube) in largest_cubes.iter().enumerate() {
@@ -141,7 +165,23 @@ fn case5() {}
 
 //Test Case 6   		(Key = 1.3.2.2.)
 #[test]
-fn case6() {}
+fn case6() {
+    let cube_sizes = BLOCKS_TWO;
+    let direction = Direction::Vertical;
+
+    let grid = generate_grid_from(&cube_sizes, direction);
+    let largest_cubes = extract_largest_cubes_from(grid);
+
+    let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
+    assert_eq!(largest_cubes.len(), expected_side_lengths.len());
+
+    for (idx, largest_cube) in largest_cubes.iter().enumerate() {
+        assert_eq!(
+            largest_cube.side_length as usize,
+            expected_side_lengths[idx]
+        );
+    }
+}
 
 //Test Case 7   		(Key = 1.3.3.1.)
 #[test]
@@ -237,7 +277,23 @@ fn case29() {}
 
 //Test Case 30  		(Key = 1.7.2.2.)
 #[test]
-fn case30() {}
+fn case30() {
+    let cube_sizes = BLOCKS_SIX;
+    let direction = Direction::Vertical;
+
+    let grid = generate_grid_from(&cube_sizes, direction);
+    let largest_cubes = extract_largest_cubes_from(grid);
+
+    let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
+    assert_eq!(largest_cubes.len(), expected_side_lengths.len());
+
+    for (idx, largest_cube) in largest_cubes.iter().enumerate() {
+        assert_eq!(
+            largest_cube.side_length as usize,
+            expected_side_lengths[idx]
+        );
+    }
+}
 
 //Test Case 31  		(Key = 1.7.3.1.)
 #[test]
