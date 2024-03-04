@@ -1,0 +1,13 @@
+Amount:
+    Zero.       [single]
+    One.        [single]
+    EvenMany.
+    OddMany.
+
+Stacked:
+    Yes.
+    No.
+
+BrickType:
+    1xCubes.
+    Mixed.

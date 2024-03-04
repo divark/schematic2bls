@@ -1,0 +1,56 @@
+
+Test Case 1  		<single>
+   Amount :  Zero
+
+
+Test Case 2  		<single>
+   Amount :  One
+
+
+Test Case 3  		(Key = 3.1.1.)
+   Amount    :  EvenMany
+   Stacked   :  Yes
+   BrickType :  1xCubes
+
+
+Test Case 4  		(Key = 3.1.2.)
+   Amount    :  EvenMany
+   Stacked   :  Yes
+   BrickType :  Mixed
+
+
+Test Case 5  		(Key = 3.2.1.)
+   Amount    :  EvenMany
+   Stacked   :  No
+   BrickType :  1xCubes
+
+
+Test Case 6  		(Key = 3.2.2.)
+   Amount    :  EvenMany
+   Stacked   :  No
+   BrickType :  Mixed
+
+
+Test Case 7  		(Key = 4.1.1.)
+   Amount    :  OddMany
+   Stacked   :  Yes
+   BrickType :  1xCubes
+
+
+Test Case 8  		(Key = 4.1.2.)
+   Amount    :  OddMany
+   Stacked   :  Yes
+   BrickType :  Mixed
+
+
+Test Case 9  		(Key = 4.2.1.)
+   Amount    :  OddMany
+   Stacked   :  No
+   BrickType :  1xCubes
+
+
+Test Case 10 		(Key = 4.2.2.)
+   Amount    :  OddMany
+   Stacked   :  No
+   BrickType :  Mixed
+
