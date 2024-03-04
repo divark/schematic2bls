@@ -1,7 +1,7 @@
 use super::Brick;
 
 pub struct BrickBuilder {
-    bricks: Vec<Brick>,
+    pub bricks: Vec<Brick>,
 }
 
 impl BrickBuilder {
@@ -15,7 +15,7 @@ impl BrickBuilder {
 
     /// Returns a collection of stacked bricks
     /// as a set of indexes that are of size 1.
-    fn get_1x_cube_bundles(&self) -> Vec<Vec<usize>> {
+    pub fn get_1x_cube_bundles(&self) -> Vec<Vec<usize>> {
         let mut filtered_1x_bricks = self
             .bricks
             .iter()
@@ -56,7 +56,7 @@ impl BrickBuilder {
     /// Changes each Brick in the given bundles Brick sets
     /// to either be labeled as the top or bottom of the
     /// 1x Cube Type, dictated by assign_1x_cube_name.
-    fn map_1x_cube_bundles(&mut self, bundles: Vec<Vec<usize>>) {
+    pub fn map_1x_cube_bundles(&mut self, bundles: Vec<Vec<usize>>) {
         for bundle in bundles {
             self.assign_1x_cube_name(&bundle);
         }

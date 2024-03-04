@@ -1,6 +1,6 @@
-mod blockland;
-mod largest_cube;
-mod model;
+pub mod blockland;
+pub mod largest_cube;
+pub mod model;
 
 use std::{
     fs::{self, File},

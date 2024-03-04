@@ -8,7 +8,7 @@ pub struct Brick {
     pub position: (f32, f32, f32),
     pub size: u16,
     floored: bool,
-    bottom_1x_cube: bool,
+    pub bottom_1x_cube: bool,
 }
 
 impl Display for Brick {
