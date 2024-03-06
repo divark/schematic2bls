@@ -1,7 +1,7 @@
 use schematic2bls::*;
 mod blockland;
 
-use std::{env, fs::File, io::Write};
+use std::env;
 
 fn main() {
     let execution_args: Vec<String> = env::args().collect();

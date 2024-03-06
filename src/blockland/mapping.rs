@@ -32,7 +32,11 @@ impl BrickBuilder {
         });
 
         let mut bundles: Vec<Vec<usize>> = Vec::new();
-        let mut current_bundle: Vec<usize> = vec![0];
+
+        if filtered_1x_bricks.first().is_none() {
+            return Vec::new();
+        }
+        let mut current_bundle: Vec<usize> = vec![filtered_1x_bricks.first().unwrap().0];
 
         for (brick_number, brick_info) in filtered_1x_bricks.iter().enumerate() {
             if brick_number == 0 {
@@ -48,6 +52,10 @@ impl BrickBuilder {
                 bundles.push(current_bundle);
                 current_bundle = vec![brick_info.0];
             }
+        }
+
+        if !current_bundle.is_empty() {
+            bundles.push(current_bundle);
         }
 
         bundles
@@ -68,7 +76,7 @@ impl BrickBuilder {
         for (brick_number, brick_idx) in cube_bundle.iter().enumerate() {
             let brick = &mut self.bricks[*brick_idx];
 
-            if brick_number % 2 != 0 {
+            if brick_number == 0 || brick_number % 2 == 0 {
                 brick.bottom_1x_cube = true;
             } else {
                 brick.bottom_1x_cube = false;

@@ -64,8 +64,13 @@ impl GridReader {
 
 pub fn grid_to_largest_cubes(grid: Vec<Vec<Vec<bool>>>) -> GridReader {
     let length = grid.len();
-    let width = grid[0].len();
-    let height = grid[0][0].len();
+    let width = grid.get(0).unwrap_or(&Vec::new()).len();
+    let height = grid
+        .get(0)
+        .unwrap_or(&Vec::new())
+        .get(0)
+        .unwrap_or(&Vec::new())
+        .len();
 
     let mut largest_cube = GridReader::new(length + 1, width + 1, height + 1);
 
