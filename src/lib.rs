@@ -9,7 +9,7 @@ use std::{
 
 use blockland::{mapping::BrickBuilder, save_file::to_save_file_output, Brick};
 use largest_cube::{extraction::get_largest_cubes, mapping::grid_to_largest_cubes, LargestCube};
-use model::{conversion::schematic_to_3dgrid, scaling::scale_grid};
+use model::conversion::schematic_to_3dgrid;
 use nbt::{decode::read_gzip_compound_tag, CompoundTag};
 
 pub fn load_schematic(model_arg: &String) -> CompoundTag {
@@ -25,14 +25,10 @@ pub fn parse_grid_from_model(model: CompoundTag) -> Vec<Vec<Vec<bool>>> {
     schematic_to_3dgrid(model)
 }
 
-pub fn scale_up_grid(scaling_factor: u8, voxel_grid: Vec<Vec<Vec<bool>>>) -> Vec<Vec<Vec<bool>>> {
-    scale_grid(&voxel_grid, scaling_factor as usize)
-}
+pub fn extract_largest_cubes_from(voxel_grid: Vec<Vec<Vec<bool>>>, scale: u16) -> Vec<LargestCube> {
+    let largest_cubes_grid = grid_to_largest_cubes(voxel_grid, scale);
 
-pub fn extract_largest_cubes_from(voxel_grid: Vec<Vec<Vec<bool>>>) -> Vec<LargestCube> {
-    let largest_cubes_grid = grid_to_largest_cubes(voxel_grid);
-
-    get_largest_cubes(largest_cubes_grid)
+    get_largest_cubes(largest_cubes_grid, scale)
 }
 
 pub fn extract_bricks_from(largest_cubes: Vec<LargestCube>) -> Vec<Brick> {

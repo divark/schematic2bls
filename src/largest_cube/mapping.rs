@@ -62,13 +62,13 @@ impl GridReader {
     }
 }
 
-pub fn grid_to_largest_cubes(grid: Vec<Vec<Vec<bool>>>) -> GridReader {
+pub fn grid_to_largest_cubes(grid: Vec<Vec<Vec<bool>>>, scale: u16) -> GridReader {
     let length = grid.len();
-    let width = grid.get(0).unwrap_or(&Vec::new()).len();
+    let width = grid.first().unwrap_or(&Vec::new()).len();
     let height = grid
-        .get(0)
+        .first()
         .unwrap_or(&Vec::new())
-        .get(0)
+        .first()
         .unwrap_or(&Vec::new())
         .len();
 
@@ -88,7 +88,7 @@ pub fn grid_to_largest_cubes(grid: Vec<Vec<Vec<bool>>>) -> GridReader {
                         .min(largest_cube.get(i - 1, j, k));
 
                     let result = largest_cube.get_mut(i, j, k).unwrap();
-                    *result = smallest_prior_cube + 1;
+                    *result = smallest_prior_cube + scale;
                 }
             }
         }

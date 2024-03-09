@@ -153,7 +153,7 @@ fn nearest_power_of_two(side_length: u16) -> u16 {
     f32::powi(2.0, power_of_two as i32) as u16
 }
 
-pub fn get_largest_cubes(largest_cube_grid: GridReader) -> Vec<LargestCube> {
+pub fn get_largest_cubes(largest_cube_grid: GridReader, scale: u16) -> Vec<LargestCube> {
     let mut largest_cubes = Vec::new();
     let sizes = largest_cube_grid.size_cloned();
 
@@ -168,13 +168,18 @@ pub fn get_largest_cubes(largest_cube_grid: GridReader) -> Vec<LargestCube> {
             break;
         }
 
-        let idx_3d = idx_3d_from(idx_1d, &sizes);
+        let mut idx_3d = idx_3d_from(idx_1d, &sizes);
+        idx_3d.0 *= scale as usize;
+        idx_3d.1 *= scale as usize;
+        idx_3d.2 *= scale as usize;
+
+        let clamped_side_length = nearest_power_of_two(largest_cube_size.clamp(1, 64));
         let largest_cube = LargestCube {
-            side_length: nearest_power_of_two(largest_cube_size.clamp(1, 64)),
+            side_length: clamped_side_length,
             indexes: idx_3d,
         };
 
-        mark_visited_from(&largest_cube, &sizes, &mut max_heap);
+        mark_visited_from(&largest_cube, &sizes, &mut max_heap, scale as usize);
         largest_cubes.push(largest_cube);
     }
 
@@ -185,16 +190,17 @@ pub fn mark_visited_from(
     largest_cube: &LargestCube,
     sizes: &GridSizes,
     max_heap: &mut BinaryIndexHeap,
+    scale: usize,
 ) {
     let side_length = largest_cube.side_length as usize;
 
-    let x = largest_cube.indexes.0;
-    let y = largest_cube.indexes.1;
-    let z = largest_cube.indexes.2;
+    let x = largest_cube.indexes.0 / scale;
+    let y = largest_cube.indexes.1 / scale;
+    let z = largest_cube.indexes.2 / scale;
 
-    let end_x = largest_cube.indexes.0 - side_length + 1;
-    let end_y = largest_cube.indexes.1 - side_length + 1;
-    let end_z = largest_cube.indexes.2 - side_length + 1;
+    let end_x = x - side_length + 1;
+    let end_y = y - side_length + 1;
+    let end_z = z - side_length + 1;
 
     for i in (end_x..=x).rev() {
         for j in (end_y..=y).rev() {
@@ -224,88 +230,15 @@ mod tests {
             }
         }
 
-        let found_cubes = grid_to_largest_cubes(grid);
+        let found_cubes = grid_to_largest_cubes(grid, 1);
 
         let expected = LargestCube {
             side_length: 2,
             indexes: (2, 2, 2),
         };
 
-        let actual = &get_largest_cubes(found_cubes)[0];
+        let actual = &get_largest_cubes(found_cubes, 1)[0];
 
         assert_eq!(expected, *actual);
     }
-
-    // #[test]
-    // fn clear_largest_cube_simple_2x2() {
-    //     let cube_size = 2;
-    //     let mut grid = vec![vec![vec![false; cube_size]; cube_size]; cube_size];
-
-    //     for length_entry in grid.iter_mut() {
-    //         for width_entry in length_entry {
-    //             for height_entry in width_entry {
-    //                 *height_entry = true;
-    //             }
-    //         }
-    //     }
-
-    //     let mut found_cubes = grid_to_largest_cubes(grid);
-    //     let largest_cube_found = get_largest_cubes(found_cubes)[0];
-
-    //     //clear_largest_cube_from(&largest_cube_found.unwrap(), &mut found_cubes);
-
-    //     let expected = vec![vec![vec![0; cube_size + 1]; cube_size + 1]; cube_size + 1];
-    //     assert_eq!(expected, found_cubes);
-    // }
-
-    #[test]
-    fn largest_cube_spaced_3x3() {
-        let cube_size = 3;
-        let grid_size = 9;
-        let mut grid = vec![vec![vec![false; grid_size]; grid_size]; grid_size];
-
-        let start_idx = 2;
-        for length_entry in grid.iter_mut().skip(start_idx).take(cube_size) {
-            for width_entry in length_entry.iter_mut().skip(start_idx).take(cube_size) {
-                for height_entry in width_entry.iter_mut().skip(start_idx).take(cube_size) {
-                    *height_entry = true;
-                }
-            }
-        }
-
-        let found_cubes = grid_to_largest_cubes(grid);
-
-        let expected = LargestCube {
-            side_length: 3,
-            indexes: (5, 5, 5),
-        };
-
-        let actual = &get_largest_cubes(found_cubes)[0];
-
-        assert_eq!(expected, *actual);
-    }
-
-    // #[test]
-    // fn clear_largest_cube_spaced_3x3() {
-    //     let cube_size = 3;
-    //     let grid_size = 9;
-    //     let mut grid = vec![vec![vec![false; grid_size]; grid_size]; grid_size];
-
-    //     let start_idx = 2;
-    //     for length_entry in grid.iter_mut().skip(start_idx).take(cube_size) {
-    //         for width_entry in length_entry.iter_mut().skip(start_idx).take(cube_size) {
-    //             for height_entry in width_entry.iter_mut().skip(start_idx).take(cube_size) {
-    //                 *height_entry = true;
-    //             }
-    //         }
-    //     }
-
-    //     let mut found_cubes = grid_to_largest_cubes(grid);
-    //     let largest_cube_found = &get_largest_cubes(found_cubes)[0];
-
-    //     clear_largest_cube_from(&largest_cube_found.unwrap(), &mut found_cubes);
-
-    //     let expected = vec![vec![vec![0; grid_size + 1]; grid_size + 1]; grid_size + 1];
-    //     assert_eq!(expected, found_cubes);
-    // }
 }

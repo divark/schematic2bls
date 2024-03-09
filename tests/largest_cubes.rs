@@ -34,7 +34,7 @@ fn case1() {
     let direction = Direction::Horizontal;
 
     let grid = generate_grid_from(&cube_sizes, direction);
-    let largest_cubes = extract_largest_cubes_from(grid);
+    let largest_cubes = extract_largest_cubes_from(grid, 1);
 
     let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
     assert_eq!(largest_cubes.len(), expected_side_lengths.len());
@@ -54,7 +54,7 @@ fn case2() {
     let direction = Direction::Horizontal;
 
     let grid = generate_grid_from(&cube_sizes, direction);
-    let largest_cubes = extract_largest_cubes_from(grid);
+    let largest_cubes = extract_largest_cubes_from(grid, 1);
 
     let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
     assert_eq!(largest_cubes.len(), expected_side_lengths.len());
@@ -78,7 +78,7 @@ fn case4() {
     let direction = Direction::Horizontal;
 
     let grid = generate_grid_from(&cube_sizes, direction);
-    let largest_cubes = extract_largest_cubes_from(grid);
+    let largest_cubes = extract_largest_cubes_from(grid, 1);
 
     let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
     assert_eq!(largest_cubes.len(), expected_side_lengths.len());
@@ -102,7 +102,7 @@ fn case6() {
     let direction = Direction::Vertical;
 
     let grid = generate_grid_from(&cube_sizes, direction);
-    let largest_cubes = extract_largest_cubes_from(grid);
+    let largest_cubes = extract_largest_cubes_from(grid, 1);
 
     let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
     assert_eq!(largest_cubes.len(), expected_side_lengths.len());
@@ -214,7 +214,7 @@ fn case30() {
     let direction = Direction::Vertical;
 
     let grid = generate_grid_from(&cube_sizes, direction);
-    let largest_cubes = extract_largest_cubes_from(grid);
+    let largest_cubes = extract_largest_cubes_from(grid, 1);
 
     let expected_side_lengths = get_expected_side_lengths_from(&cube_sizes);
     assert_eq!(largest_cubes.len(), expected_side_lengths.len());
