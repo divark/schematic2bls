@@ -192,7 +192,7 @@ pub fn mark_visited_from(
     max_heap: &mut BinaryIndexHeap,
     scale: usize,
 ) {
-    let side_length = largest_cube.side_length as usize;
+    let side_length = largest_cube.side_length as usize / scale;
 
     let x = largest_cube.indexes.0 / scale;
     let y = largest_cube.indexes.1 / scale;
