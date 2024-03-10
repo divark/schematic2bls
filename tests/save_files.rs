@@ -34,7 +34,7 @@ fn place_one_4x_cube() {
 
 #[test]
 fn place_4x_cube_tower() {
-    let cube_sizes = [1, 1, 1, 1];
+    let cube_sizes = [1; 4];
     let expected = include_str!("../assets/brick_comparisons/4xCubesTower.bls").to_string();
 
     let actual = paint_to_bricks(&cube_sizes, Direction::Vertical);
@@ -44,7 +44,7 @@ fn place_4x_cube_tower() {
 
 #[test]
 fn place_1x4_4x_cubes() {
-    let cube_sizes = [1, 1, 1, 1];
+    let cube_sizes = [1; 4];
     let expected = include_str!("../assets/brick_comparisons/4xCubesLine.bls").to_string();
 
     let actual = paint_to_bricks(&cube_sizes, Direction::Horizontal);
