@@ -6,7 +6,7 @@ use schematic2bls::*;
 
 /// Returns a Blockland Save File formatted String based on what
 /// Bricks (cube_sizes) were placed depending on its direction.
-/// 
+///
 /// NOTE: All cube_sizes will be scaled up (multiplied) by 4
 /// to match the default behavior of main.
 fn paint_to_bricks(cube_sizes: &[usize], direction: Direction) -> String {
@@ -19,7 +19,8 @@ fn paint_to_bricks(cube_sizes: &[usize], direction: Direction) -> String {
 
     let grid = cube_painter.to_grid();
     let largest_cubes = extract_largest_cubes_from(grid, scaling_factor);
-    let bricks = extract_bricks_from(largest_cubes);
+    let mut bricks = extract_bricks_from(largest_cubes);
+    bricks.sort_by(|brick1, brick2| brick1.position.partial_cmp(&brick2.position).unwrap());
 
     to_save_file_output(&bricks)
 }

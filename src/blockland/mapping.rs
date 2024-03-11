@@ -16,7 +16,12 @@ impl BrickBuilder {
     pub fn build(&mut self) -> Vec<Brick> {
         let mut adjusted_coordinate_bricks = Vec::new();
 
-        let min_size = self.bricks[0].size;
+        let min_size = self
+            .bricks
+            .iter()
+            .min_by(|brick1, brick2| brick1.position.partial_cmp(&brick2.position).unwrap())
+            .unwrap()
+            .size;
 
         for brick in &self.bricks {
             adjusted_coordinate_bricks.push(brick.calculate_right_offset(min_size));
