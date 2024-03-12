@@ -64,6 +64,21 @@ impl CubePainter {
         self.next_idx = next_idx;
     }
 
+    /// Moves the next available position to draw by an amount.
+    pub fn shift(&mut self, direction: Direction, amount: isize) {
+        let horizontal_shift = (self.next_idx.0 as isize + amount) as usize;
+        let vertical_shift = (self.next_idx.1 as isize + amount) as usize;
+
+        match direction {
+            Direction::Horizontal => self.next_idx.0 = horizontal_shift,
+            Direction::Vertical => self.next_idx.1 = vertical_shift,
+            Direction::Diagonal => {
+                self.next_idx.0 = horizontal_shift;
+                self.next_idx.1 = vertical_shift;
+            }
+        }
+    }
+
     pub fn to_grid(&self) -> Vec<Vec<Vec<bool>>> {
         self.grid.clone()
     }

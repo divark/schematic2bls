@@ -25,6 +25,30 @@ fn paint_to_bricks(cube_sizes: &[usize], direction: Direction) -> String {
     to_save_file_output(&bricks)
 }
 
+/// Returns a Blockland Save File formatted String based on what
+/// Uniform Bricks (cube_sizes) were placed with overlap depending
+/// on its direction.
+///
+/// Pre-conditions:
+/// - cube_sizes must have all same values. Ex: [2, 2, 2, 2]
+/// - cube_size elements must be greater than 1.
+fn paint_with_overlap(cube_sizes: &[usize], direction: Direction) -> String {
+    let scaling_factor = 4;
+
+    let mut cube_painter = CubePainter::new(cube_sizes);
+    for cube_size in cube_sizes.iter() {
+        cube_painter.draw(direction, *cube_size);
+        cube_painter.shift(direction, -(*cube_size as isize - 1));
+    }
+
+    let grid = cube_painter.to_grid();
+    let largest_cubes = extract_largest_cubes_from(grid, scaling_factor);
+    let mut bricks = extract_bricks_from(largest_cubes);
+    bricks.sort_by(|brick1, brick2| brick1.position.partial_cmp(&brick2.position).unwrap());
+
+    to_save_file_output(&bricks)
+}
+
 #[test]
 fn place_one_4x_cube() {
     let cube_sizes = [1];
@@ -314,3 +338,14 @@ fn place_increasing_cubes_scale() {
 
     assert_eq!(expected, actual);
 }
+
+// TODO: Create 2Overlapping8xCubes.bls from Blockland.
+//#[test]
+//fn place_two_overlapping_8x() {
+//    let cube_sizes = [2, 2];
+//    let expected = include_str!("../assets/brick_comparisons/2Overlapping8xCubes.bls").to_string();
+//
+//    let actual = paint_with_overlap(&cube_sizes, Direction::Diagonal);
+//
+//    assert_eq!(expected, actual);
+//}
