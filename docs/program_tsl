@@ -9,12 +9,14 @@ Amount:
 	Three.
 	Four.
 	Five.
-	Six.
 
 Placed:
-	Horizontal.	[if !one]
-	Vertical.	[if !one]
-	Diagonal.	[if !one]
+	X-Axis.	    [if !one]
+    X+Y.        [if !one]
+    X+Z.        [if !one]
+    Y-Axis.	    [if !one]
+    Y+Z.        [if !one]
+    Z-Axis.	    [if !one]
 
 Type:
 	Same.		[if !one]
