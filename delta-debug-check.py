@@ -7,7 +7,10 @@ import time
 
 import pyautogui
 
-BLOCKLAND_SAVE_PATH = Path('C:\Program Files (x86)\Steam\steamapps\common\Blockland\saves')
+BLOCKLAND_PATH = Path('C:\Program Files (x86)\Steam\steamapps\common\Blockland')
+BLOCKLAND_SAVE_PATH = BLOCKLAND_PATH.joinpath("saves")
+BLOCKLAND_EXECUTABLE_PATH = BLOCKLAND_PATH.joinpath("Blockland.exe")
+
 DELTA_DEBUGGING_ASSETS_PATH = Path('assets/delta_debugging')
 
 def runSchematic2BLS(schematicFile: str, scale: int) -> Path:
@@ -40,9 +43,7 @@ def loadSave(outputName: str):
     Keyword arguments:
     -- outputName: Name of the Save to load in Blockland without the extension.
     """
-    blocklandExecutablePath = Path('C:\Program Files (x86)\Steam\steamapps\common\Blockland\Blockland.exe')
-
-    command = [str(blocklandExecutablePath)]
+    command = [str(BLOCKLAND_EXECUTABLE_PATH)]
 
     # NOTE: It is assumed that the game is not running by default,
     # so we start the application and wait until it is fully loaded.
