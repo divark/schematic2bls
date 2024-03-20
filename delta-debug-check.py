@@ -49,6 +49,9 @@ def loadSave(outputName: str):
     blocklandProcess = subprocess.Popen(command, stdout=subprocess.PIPE)
     while True:
         line = blocklandProcess.stdout.readline().rstrip().decode("utf-8")
+        # This is the last line that shows up in the
+        # Blockland console when the game is loaded
+        # and waiting on the Main Menu.
         if 'Authentication SUCCESS' in line:
             break
 
@@ -63,15 +66,24 @@ def loadSave(outputName: str):
 
     selectButtonX, selectButtonY = pyautogui.locateCenterOnScreen(str(DELTA_DEBUGGING_ASSETS_PATH.joinpath('selectbutton.png')))
     pyautogui.click(x=selectButtonX, y=selectButtonY, duration=mouseClickWaitSecs)
+    # The Launch Game button happens to be in the same
+    # location, so we just click where we are again.
     pyautogui.click()
 
     while True:
         line = blocklandProcess.stdout.readline().rstrip().decode("utf-8")
+        # This is the last line that shows up in the
+        # Blockland console when loaded into a Single Player
+        # instance.
         if "Linking GLSL program" in line:
             break
     
-    # And the finale, loading the Bricks. It's assumed that the top save
-    # will be our output.
+    # And the finale, loading the Bricks. This loads the most recent save
+    # from the game, which is assumed to be at the top and automatically
+    # selected.
+        
+    # Testing locally, once again we found a case where we outspeed
+    # Blockland, so we have to wait for it to catch up again.
     time.sleep(2.0)
     pyautogui.typewrite(['esc'])
     loadButtonX, loadButtonY = pyautogui.locateCenterOnScreen(str(DELTA_DEBUGGING_ASSETS_PATH.joinpath('loadbutton.png')))
