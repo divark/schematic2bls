@@ -168,11 +168,11 @@ def checkForHoles(schematicFile: str, scale: int) -> bool:
 
 if __name__ == '__main__':
     numArguments = len(sys.argv)
-    if numArguments != 2:
-        print("{}: Expected one input schematic argument.".format(sys.argv[0]))
-        exit(1)
+    schematicFilePath = "assets/peachs_castle_4.schematic"
+    if numArguments == 2:
+        print("{}: Setting schematic file input to {}".format(sys.argv[0], sys.argv[1]))
+        schematicFilePath = sys.argv[1]
 
-    schematicFilePath = sys.argv[1]
     try:
         hasHoles = checkForHoles(schematicFilePath, 4)
         if hasHoles:
