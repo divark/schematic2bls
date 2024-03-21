@@ -68,6 +68,19 @@ def moveToSaves(outputPath: Path):
     """
     shutil.copy(outputPath, BLOCKLAND_SAVE_PATH)
 
+def listenUntil(process: Popen[bytes], message: str):
+    """Halts the program until the given process
+    yields a certain message.
+
+    Keyword arguments:
+    process -- A subprocess instance that's currently running.
+    message -- The string used to check whether it's okay to proceed.
+    """
+    while True:
+        line = process.stdout.readline().rstrip()
+        if message in line:
+            break
+
 def loadSave():
     """Returns the process referencing Blockland after Loading a Save File.
     """
@@ -76,13 +89,11 @@ def loadSave():
     # NOTE: It is assumed that the game is not running by default,
     # so we start the application and wait until it is fully loaded.
     blocklandProcess = subprocess.Popen(command, encoding='ascii', stdout=subprocess.PIPE, text=True)
-    while True:
-        line = blocklandProcess.stdout.readline().rstrip()
-        # This is the last line that shows up in the
-        # Blockland console when the game is loaded
-        # and waiting on the Main Menu.
-        if 'Engine initialized' in line:
-            break
+
+    # This is the last line that shows up in the
+    # Blockland console when the game is loaded
+    # and waiting on the Main Menu.
+    listenUntil(blocklandProcess, "Engine initialized")
 
     # Blockland cannot handle the raw speed of pyautogui, so
     # there has to be a delay.
@@ -99,13 +110,10 @@ def loadSave():
     # location, so we just click where we are again.
     pyautogui.click()
 
-    while True:
-        line = blocklandProcess.stdout.readline().rstrip()
-        # This is the last line that shows up in the
-        # Blockland console when loaded into a Single Player
-        # instance.
-        if "Linking GLSL program" in line:
-            break
+    # This is the last line that shows up in the
+    # Blockland console when loaded into a Single Player
+    # instance.
+    listenUntil(blocklandProcess, "Linking GLSL program")
     
     # And the finale, loading the Bricks. This loads the most recent save
     # from the game, which is assumed to be at the top and automatically
@@ -120,11 +128,8 @@ def loadSave():
     loadSaveButtonX, loadSaveButtonY = (1544, 922)#pyautogui.locateCenterOnScreen(str(DELTA_DEBUGGING_ASSETS_PATH.joinpath('loadsavebutton.png')))
     pyautogui.click(x=loadSaveButtonX, y=loadSaveButtonY, duration=mouseClickWaitSecs)
 
-    while True:
-        line = blocklandProcess.stdout.readline().rstrip()
-        if "LOADING BRICKS" in line:
-            pyautogui.sleep(10.0)
-            break
+    listenUntil(blocklandProcess, "LOADING BRICKS")
+    pyautogui.sleep(10.0)
 
     return blocklandProcess
 
