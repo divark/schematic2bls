@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 import traceback
 
@@ -9,7 +10,17 @@ from pathlib import Path
 
 import pyautogui
 
-BLOCKLAND_PATH = Path('C:\Program Files (x86)\Steam\steamapps\common\Blockland')
+# NOTE: This is the variable to change depending on
+# - Your Operating System
+# - Where Steam is installed.
+STEAM_PATH = Path('/home/divark/.var/app/com.valvesoftware.Steam/.steam/steam/steamapps')
+STEAM_APPS_PATH = STEAM_PATH.joinpath('common')
+STEAM_COMPATDATA_PATH = STEAM_PATH.joinpath('compatdata')
+
+PROTON_EXECUTABLE_PATH = STEAM_APPS_PATH.joinpath('Proton - Experimental/proton')
+
+BLOCKLAND_PATH = STEAM_APPS_PATH.joinpath('Blockland')
+BLOCKLAND_CONSOLE_PATH = BLOCKLAND_PATH.joinpath("console.log")
 BLOCKLAND_SAVE_PATH = BLOCKLAND_PATH.joinpath("saves")
 BLOCKLAND_EXECUTABLE_PATH = BLOCKLAND_PATH.joinpath("Blockland.exe")
 
@@ -19,6 +30,19 @@ DELTA_DEBUGGING_ASSETS_PATH = Path('assets/delta_debugging')
 # identifying the line number of the "Linecount x"
 # string.
 LINECOUNT_LINE_NUMBER = 68 - 1
+
+def getRunCommandForBlockland():
+    """Returns a command with arguments needed to run
+    Blockland represented as an array.
+    """
+    os.environ["STEAM_COMPAT_DATA_PATH"] = str(STEAM_COMPATDATA_PATH)
+    os.environ["STEAM_COMPAT_CLIENT_INSTALL_PATH"] = str(STEAM_COMPATDATA_PATH)
+
+    proton_command = [str(PROTON_EXECUTABLE_PATH), "run"]
+
+    blockland_executable = [BLOCKLAND_EXECUTABLE_PATH]
+
+    return proton_command + blockland_executable
 
 def runSchematic2BLS(schematicFile: str, scale: int) -> Path:
     """Returns the path of the generated Blockland Save file after running
@@ -47,7 +71,7 @@ def moveToSaves(outputPath: Path):
 def loadSave():
     """Returns the process referencing Blockland after Loading a Save File.
     """
-    command = [str(BLOCKLAND_EXECUTABLE_PATH)]
+    command = getRunCommandForBlockland() 
 
     # NOTE: It is assumed that the game is not running by default,
     # so we start the application and wait until it is fully loaded.
@@ -57,7 +81,7 @@ def loadSave():
         # This is the last line that shows up in the
         # Blockland console when the game is loaded
         # and waiting on the Main Menu.
-        if 'Authentication SUCCESS' in line:
+        if 'Engine initialized' in line:
             break
 
     # Blockland cannot handle the raw speed of pyautogui, so
