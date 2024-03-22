@@ -13,7 +13,7 @@ import pyautogui
 # NOTE: This is the variable to change depending on
 # - Your Operating System
 # - Where Steam is installed.
-STEAM_PATH = Path('/home/divark/.var/app/com.valvesoftware.Steam/.steam/steam/steamapps')
+STEAM_PATH = Path('C:\Program Files (x86)\Steam\steamapps')
 STEAM_APPS_PATH = STEAM_PATH.joinpath('common')
 STEAM_COMPATDATA_PATH = STEAM_PATH.joinpath('compatdata')
 
@@ -35,6 +35,11 @@ def getRunCommandForBlockland():
     """Returns a command with arguments needed to run
     Blockland represented as an array.
     """
+    # Windows doesn't need the Proton compatibility layer, since
+    # we're running native Windows code at this rate.
+    if os.name == 'nt':
+        return [BLOCKLAND_EXECUTABLE_PATH]
+
     os.environ["STEAM_COMPAT_DATA_PATH"] = str(STEAM_COMPATDATA_PATH)
     os.environ["STEAM_COMPAT_CLIENT_INSTALL_PATH"] = str(STEAM_COMPATDATA_PATH)
 
@@ -68,7 +73,7 @@ def moveToSaves(outputPath: Path):
     """
     shutil.copy(outputPath, BLOCKLAND_SAVE_PATH)
 
-def listenUntil(process: Popen[bytes], message: str):
+def listenUntil(process: subprocess.Popen, message: str):
     """Halts the program until the given process
     yields a certain message.
 
@@ -93,7 +98,7 @@ def loadSave():
     # This is the last line that shows up in the
     # Blockland console when the game is loaded
     # and waiting on the Main Menu.
-    listenUntil(blocklandProcess, "Engine initialized")
+    listenUntil(blocklandProcess, "Authentication SUCCESS")
 
     # Blockland cannot handle the raw speed of pyautogui, so
     # there has to be a delay.
