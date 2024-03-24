@@ -35,17 +35,20 @@ def getRunCommandForBlockland():
     """Returns a command with arguments needed to run
     Blockland represented as an array.
     """
+    # A dedicated server is preferred so that we can just type
+    # in commands, versus having to rely off of UI elements.
+    # 
+    # Reference: https://blockland.fandom.com/wiki/How_to_host_a_dedicated_server_in_Blockland.
+    blockland_executable = [BLOCKLAND_EXECUTABLE_PATH, "ptlaaxobimwroe", "-dedicated"]
+    if os.name == 'nt':
+        return blockland_executable
+
     # Windows doesn't need the Proton compatibility layer, since
     # we're running native Windows code at this rate.
-    if os.name == 'nt':
-        return [BLOCKLAND_EXECUTABLE_PATH]
-
     os.environ["STEAM_COMPAT_DATA_PATH"] = str(STEAM_COMPATDATA_PATH)
     os.environ["STEAM_COMPAT_CLIENT_INSTALL_PATH"] = str(STEAM_COMPATDATA_PATH)
 
     proton_command = [str(PROTON_EXECUTABLE_PATH), "run"]
-
-    blockland_executable = [BLOCKLAND_EXECUTABLE_PATH]
 
     return proton_command + blockland_executable
 
@@ -86,8 +89,11 @@ def listenUntil(process: subprocess.Popen, message: str):
         if message in line:
             break
 
-def loadSave():
-    """Returns the process referencing Blockland after Loading a Save File.
+def loadSave(saveFileName: str):
+    """Returns the process referencing Blockland after Loading the Save File.
+
+    Keyword arguments:
+    saveFileName -- The name of the Save file to load.
     """
     command = getRunCommandForBlockland() 
 
@@ -97,42 +103,16 @@ def loadSave():
 
     # This is the last line that shows up in the
     # Blockland console when the game is loaded
-    # and waiting on the Main Menu.
-    listenUntil(blocklandProcess, "Authentication SUCCESS")
+    listenUntil(blocklandProcess, "Dedicated server is now running.")
 
-    # Blockland cannot handle the raw speed of pyautogui, so
-    # there has to be a delay.
-    mouseClickWaitSecs = 1
+    # Loading Saves from the server is possible due to the following Blockland Forum post:
+    # https://forum.blockland.us/index.php?topic=294753.0
+    pyautogui.typewrite('serverDirectSaveFileLoad("saves/{}", 3, "", 1);'.format(saveFileName))
+    pyautogui.press('enter')
 
-    # All of this gets us into a Single Player instance
-    # of Blockland ready to go.
-    startButtonX, startButtonY = (697, 502)#pyautogui.locateCenterOnScreen(str(DELTA_DEBUGGING_ASSETS_PATH.joinpath('startgamebutton.png')))
-    pyautogui.click(x=startButtonX, y=startButtonY, duration=mouseClickWaitSecs)
-
-    selectButtonX, selectButtonY = (1996, 1207)#pyautogui.locateCenterOnScreen(str(DELTA_DEBUGGING_ASSETS_PATH.joinpath('selectbutton.png')))
-    pyautogui.click(x=selectButtonX, y=selectButtonY, duration=mouseClickWaitSecs)
-    # The Launch Game button happens to be in the same
-    # location, so we just click where we are again.
-    pyautogui.click()
-
-    # This is the last line that shows up in the
-    # Blockland console when loaded into a Single Player
-    # instance.
-    listenUntil(blocklandProcess, "Linking GLSL program")
-    
-    # And the finale, loading the Bricks. This loads the most recent save
-    # from the game, which is assumed to be at the top and automatically
-    # selected.
-        
-    # Testing locally, once again we found a case where we outspeed
-    # Blockland, so we have to wait for it to catch up again.
-    pyautogui.typewrite(['esc'])
-    loadButtonX, loadButtonY = (1220, 785)#pyautogui.locateCenterOnScreen(str(DELTA_DEBUGGING_ASSETS_PATH.joinpath('loadbutton.png')))
-    pyautogui.click(x=loadButtonX, y=loadButtonY, duration=mouseClickWaitSecs)
-
-    loadSaveButtonX, loadSaveButtonY = (1544, 922)#pyautogui.locateCenterOnScreen(str(DELTA_DEBUGGING_ASSETS_PATH.joinpath('loadsavebutton.png')))
-    pyautogui.click(x=loadSaveButtonX, y=loadSaveButtonY, duration=mouseClickWaitSecs)
-
+    # The server has no way of indicating when we're done,
+    # so I had to time it manually for my specific schematic
+    # file to approximate when it _should_ be done.
     listenUntil(blocklandProcess, "LOADING BRICKS")
     pyautogui.sleep(10.0)
 
@@ -158,7 +138,6 @@ def captureBrickCountFromBlockland(blocklandProcess: subprocess.Popen[bytes]) ->
     Keyword arguments:
     blocklandProcess -- Reference to the subprocess running Blockland.
     """
-    pyautogui.shortcut('alt', 'tab')
     pyautogui.typewrite('echo(getBrickCount());')
     pyautogui.press('enter')
 
@@ -194,7 +173,8 @@ def checkForHoles(schematicFile: str, scale: int) -> bool:
     outputPath = runSchematic2BLS(schematicFile, scale)
     moveToSaves(outputPath)
     
-    blocklandProcess = loadSave()
+    saveFileName = outputPath.name
+    blocklandProcess = loadSave(saveFileName)
     brickCount, brickTotal = getBrickCounts(blocklandProcess, outputPath)
     blocklandProcess.terminate()
     
