@@ -24,7 +24,7 @@ BLOCKLAND_CONSOLE_PATH = BLOCKLAND_PATH.joinpath("console.log")
 BLOCKLAND_SAVE_PATH = BLOCKLAND_PATH.joinpath("saves")
 BLOCKLAND_EXECUTABLE_PATH = BLOCKLAND_PATH.joinpath("Blockland.exe")
 
-DELTA_DEBUGGING_ASSETS_PATH = Path('assets/delta_debugging')
+DELTA_DEBUGGING_ASSETS_PATH = Path('../assets/delta_debugging')
 
 # This was found by opening a bls file and
 # identifying the line number of the "Linecount x"
@@ -52,7 +52,21 @@ def getRunCommandForBlockland():
 
     return proton_command + blockland_executable
 
-def runSchematic2BLS(schematicFile: str, scale: int) -> Path:
+def runBinvox(objFile: Path) -> Path:
+    """Returns the Path to a generated Minecraft Schematic File
+    after running the binvox executable.
+
+    Keyword arguments:
+    objFile -- Path to the 3D Model File (.obj) used for conversion.
+    """
+    command = [".\\binvox.exe"]
+    arguments = ["-e", "-rotz", "-t", "schematic", str(objFile)]
+
+    subprocess.run(command + arguments, check=True)
+
+    return Path(DELTA_DEBUGGING_ASSETS_PATH.joinpath(objFile.stem + ".schematic"))
+
+def runSchematic2BLS(schematicFile: Path, scale: int) -> Path:
     """Returns the path of the generated Blockland Save file after running
     schematic2BLS.
 
@@ -61,7 +75,7 @@ def runSchematic2BLS(schematicFile: str, scale: int) -> Path:
     scale -- The minimum size cube to use during conversion.
     """
     command = ["cargo", "run", "--release"]
-    arguments = ["--", schematicFile, str(scale)]
+    arguments = ["--", str(schematicFile), str(scale)]
 
     subprocess.run(command + arguments, check=True)
 
@@ -162,14 +176,15 @@ def getBrickCounts(blocklandProcess: subprocess.Popen[bytes], outputPath: Path) 
 
     return (brickCount, brickTotal)
 
-def checkForHoles(schematicFile: str, scale: int) -> bool:
+def checkForHoles(objFile: Path, scale: int) -> bool:
     """Returns whether a converted Minecraft Schematic to a Blockland Save
     contains holes when running schematic2BLS.
 
     Keyword arguments:
-    schematicFile -- Path to the Minecraft Schematic to convert into a Blockland Save.
+    objFile -- Path to the 3D Model File (.obj) to convert into a Blockland Save.
     scale -- The Brick Cube size to be used for each block from Minecraft.
     """
+    schematicFile = runBinvox(objFile)
     outputPath = runSchematic2BLS(schematicFile, scale)
     moveToSaves(outputPath)
     
@@ -182,13 +197,13 @@ def checkForHoles(schematicFile: str, scale: int) -> bool:
 
 if __name__ == '__main__':
     numArguments = len(sys.argv)
-    schematicFilePath = "assets/peachs_castle_4.schematic"
+    objFilePath = DELTA_DEBUGGING_ASSETS_PATH.joinpath("peachs_castle.obj").absolute().resolve()
     if numArguments == 2:
         print("{}: Setting schematic file input to {}".format(sys.argv[0], sys.argv[1]))
-        schematicFilePath = sys.argv[1]
+        objFilePath = Path(sys.argv[1]).absolute().resolve()
 
     try:
-        hasHoles = checkForHoles(schematicFilePath, 4)
+        hasHoles = checkForHoles(objFilePath, 4)
         if hasHoles:
             exit(0)
         else:
