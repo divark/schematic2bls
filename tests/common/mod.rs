@@ -1,8 +1,11 @@
 #[derive(Copy, Clone)]
 pub enum Direction {
-    Horizontal,
-    Vertical,
-    Diagonal,
+    XAxis,
+    XYAxis,
+    XZAxis,
+    YAxis,
+    YZAxis,
+    ZAxis,
 }
 
 /// A mock-based tool used to create 3D Grids
@@ -42,15 +45,26 @@ impl CubePainter {
         }
 
         match direction {
-            Direction::Horizontal => {
+            Direction::XAxis => {
                 x += cube_size;
             }
-            Direction::Vertical => {
-                z += cube_size;
-            }
-            Direction::Diagonal => {
+            Direction::XYAxis => {
                 x += cube_size;
                 y += cube_size;
+            }
+            Direction::XZAxis => {
+                x += cube_size;
+                z += cube_size;
+            }
+            Direction::YAxis => {
+                y += cube_size;
+            }
+            Direction::YZAxis => {
+                y += cube_size;
+                z += cube_size;
+            }
+            Direction::ZAxis => {
+                z += cube_size;
             }
         }
 
@@ -66,16 +80,26 @@ impl CubePainter {
 
     /// Moves the next available position to draw by an amount.
     pub fn shift(&mut self, direction: Direction, amount: isize) {
-        let horizontal_shift = (self.next_idx.0 as isize + amount) as usize;
-        let vertical_shift = (self.next_idx.1 as isize + amount) as usize;
+        let x_shift = (self.next_idx.0 as isize + amount) as usize;
+        let y_shift = (self.next_idx.1 as isize + amount) as usize;
+        let z_shift = (self.next_idx.2 as isize + amount) as usize;
 
         match direction {
-            Direction::Horizontal => self.next_idx.0 = horizontal_shift,
-            Direction::Vertical => self.next_idx.1 = vertical_shift,
-            Direction::Diagonal => {
-                self.next_idx.0 = horizontal_shift;
-                self.next_idx.1 = vertical_shift;
+            Direction::XAxis => self.next_idx.0 = x_shift,
+            Direction::XYAxis => {
+                self.next_idx.0 = x_shift;
+                self.next_idx.1 = y_shift;
             }
+            Direction::XZAxis => {
+                self.next_idx.0 = x_shift;
+                self.next_idx.2 = z_shift;
+            }
+            Direction::YAxis => self.next_idx.1 = y_shift,
+            Direction::YZAxis => {
+                self.next_idx.1 = y_shift;
+                self.next_idx.2 = z_shift;
+            }
+            Direction::ZAxis => self.next_idx.2 = z_shift,
         }
     }
 
