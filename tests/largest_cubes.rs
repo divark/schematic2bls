@@ -37,6 +37,28 @@ fn assert_largest_cubes_match(largest_cubes: &[LargestCube], expected_side_lengt
     }
 }
 
+//Special Case: 16-8 Overlap
+#[test]
+fn special_case_1() {
+    let cube_sizes = [4, 2];
+    let direction = Direction::XAxis;
+
+    let mut cube_painter = CubePainter::new(&cube_sizes);
+    for cube_size in cube_sizes.iter() {
+        cube_painter.draw(direction, *cube_size);
+        cube_painter.shift(direction, -1);
+    }
+
+    let grid = cube_painter.to_grid();
+    let largest_cubes = extract_largest_cubes_from(grid, 4);
+
+    let expected_side_lengths = vec![16, 4, 4, 4, 4];
+
+    assert_eq!(largest_cubes.len(), expected_side_lengths.len());
+
+    assert_largest_cubes_match(&largest_cubes, &expected_side_lengths);
+}
+
 //Test Case 1   		<single>
 #[test]
 fn case1() {

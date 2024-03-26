@@ -172,24 +172,33 @@ pub fn get_largest_cubes(largest_cube_grid: GridReader, scale: u16) -> Vec<Large
         idx_3d.2 *= scale as usize;
 
         let clamped_side_length = nearest_power_of_two(largest_cube_size.clamp(1, 64));
-        let largest_cube = LargestCube {
+        let mut largest_cube = LargestCube {
             side_length: clamped_side_length,
             indexes: idx_3d,
         };
 
-        mark_visited_from(&largest_cube, &sizes, &mut max_heap, scale as usize);
+        let found_overlap = mark_visited_from(&largest_cube, &sizes, &mut max_heap, scale as usize);
+        if found_overlap {
+            // An overlap means that the current size of the Largest
+            // Cube is too big. Knocking it down by our scale guarantees
+            // there will not be another overlap.
+            largest_cube.side_length = nearest_power_of_two(clamped_side_length - scale);
+        }
+
         largest_cubes.push(largest_cube);
     }
 
     largest_cubes
 }
 
+/// Returns whether marking all points contained by the claimed
+/// Largest Cube found no overlaps in the process, or false otherwise.
 pub fn mark_visited_from(
     largest_cube: &LargestCube,
     sizes: &GridSizes,
     max_heap: &mut BinaryIndexHeap,
     scale: usize,
-) {
+) -> bool {
     let side_length = largest_cube.side_length as usize / scale;
 
     let x = largest_cube.indexes.0 / scale;
@@ -200,14 +209,41 @@ pub fn mark_visited_from(
     let end_y = y - side_length + 1;
     let end_z = z - side_length + 1;
 
+    // There exists an edge case in the Maximal Cube algorithm where
+    // if you have two cubes of size 16, and 8 in that order from
+    // left to right, for example, and both slightly overlap each other,
+    // the 16 will be correctly chosen, but the 8 will also be selected,
+    // which is wrong, since that will cause an overlap.
+    //
+    // Because of this situation, we need a way of checking
+    // if there's overlap, and if so, to undo what we just did
+    // and signal to the caller that there was a problem.
+    let mut found_overlap = false;
+    let mut found_indexes = Vec::new();
     for i in (end_x..=x).rev() {
         for j in (end_y..=y).rev() {
             for k in (end_z..=z).rev() {
                 let idx_1d = idx_1d_from(i, j, k, sizes);
+                if max_heap.visited.contains(&idx_1d) {
+                    found_overlap = true;
+                    break;
+                }
+
+                found_indexes.push(idx_1d);
                 max_heap.visited.insert(idx_1d);
             }
         }
     }
+
+    if !found_overlap {
+        return found_overlap;
+    }
+
+    while let Some(visited_idx) = found_indexes.pop() {
+        max_heap.visited.remove(&visited_idx);
+    }
+
+    found_overlap
 }
 
 #[cfg(test)]
