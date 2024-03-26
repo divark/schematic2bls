@@ -17,7 +17,7 @@ impl Display for Brick {
 
         write!(
             f,
-            "{}\" {} {} {} 0 {} 0  0 0 1 1 1",
+            "{}\" {} {} {} 0 {} 6  0 0 1 1 1",
             cube_name, self.position.0, self.position.1, z_idx, self.floored as usize
         )
     }
