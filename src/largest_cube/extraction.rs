@@ -11,13 +11,11 @@ pub struct LargestCubeEntry {
 pub struct BinaryIndexHeap {
     pub heap: BinaryHeap<LargestCubeEntry>,
     pub visited: HashSet<usize>,
-    pub data: HashMap<usize, u16>,
 }
 
 impl BinaryIndexHeap {
     pub fn from(grid: GridReader) -> BinaryIndexHeap {
         let mut heap = BinaryHeap::with_capacity(grid.data().len());
-        let mut data = HashMap::with_capacity(grid.data().len());
 
         for (i, grid_item) in grid.data().iter().enumerate() {
             if *grid_item == 0 {
@@ -28,33 +26,22 @@ impl BinaryIndexHeap {
                 data: *grid_item,
                 idx: i,
             });
-
-            data.insert(i, *grid_item);
         }
 
         let index_max_heap = BinaryIndexHeap {
             heap,
             visited: HashSet::new(),
-            data,
         };
 
         index_max_heap
     }
 
-    pub fn pop(&mut self) -> Option<usize> {
-        if let Some(largest_cube_entry) = self.heap.pop() {
-            return Some(largest_cube_entry.idx);
-        }
-
-        return None;
+    pub fn pop(&mut self) -> Option<LargestCubeEntry> {
+        self.heap.pop()
     }
 
     pub fn has_visited(&self, idx: usize) -> bool {
         self.visited.contains(&idx)
-    }
-
-    pub fn get_data(&self, idx: usize) -> u16 {
-        *self.data.get(&idx).unwrap()
     }
 }
 
@@ -69,12 +56,13 @@ pub fn get_largest_cubes(largest_cube_grid: GridReader, scale: u16) -> Vec<Large
     let sizes = largest_cube_grid.size_cloned();
 
     let mut max_heap = BinaryIndexHeap::from(largest_cube_grid);
-    while let Some(idx_1d) = max_heap.pop() {
+    while let Some(largest_cube_entry) = max_heap.pop() {
+        let idx_1d = largest_cube_entry.idx;
         if max_heap.has_visited(idx_1d) {
             continue;
         }
 
-        let largest_cube_size = max_heap.get_data(idx_1d);
+        let largest_cube_size = largest_cube_entry.data;
         if largest_cube_size == 0 {
             break;
         }
