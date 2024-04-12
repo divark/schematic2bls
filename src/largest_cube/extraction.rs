@@ -1,139 +1,52 @@
 use super::mapping::{idx_1d_from, idx_3d_from, GridReader, GridSizes};
 use super::LargestCube;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet};
+
+#[derive(Eq, PartialEq, Ord, PartialOrd)]
+pub struct LargestCubeEntry {
+    pub data: u16,
+    pub idx: usize,
+}
 
 pub struct BinaryIndexHeap {
-    pub max_idx_heap: Vec<usize>,
+    pub heap: BinaryHeap<LargestCubeEntry>,
     pub visited: HashSet<usize>,
-    pub node_data: HashMap<usize, u16>,
+    pub data: HashMap<usize, u16>,
 }
 
 impl BinaryIndexHeap {
     pub fn from(grid: GridReader) -> BinaryIndexHeap {
-        let mut node_data = HashMap::new();
-        let mut max_idx_heap = Vec::new();
+        let mut heap = BinaryHeap::with_capacity(grid.data().len());
+        let mut data = HashMap::with_capacity(grid.data().len());
 
         for (i, grid_item) in grid.data().iter().enumerate() {
             if *grid_item == 0 {
                 continue;
             }
 
-            max_idx_heap.push(i);
-            node_data.insert(i, *grid_item);
+            heap.push(LargestCubeEntry {
+                data: *grid_item,
+                idx: i,
+            });
+
+            data.insert(i, *grid_item);
         }
 
-        let mut index_max_heap = BinaryIndexHeap {
-            max_idx_heap,
+        let index_max_heap = BinaryIndexHeap {
+            heap,
             visited: HashSet::new(),
-            node_data,
+            data,
         };
 
-        index_max_heap.heapsort();
         index_max_heap
     }
 
-    fn heapsort(&mut self) {
-        for size in 1..=self.max_idx_heap.len() {
-            self.heapify_up(size);
-        }
-    }
-
-    fn heapify_up(&mut self, size: usize) {
-        // To preserve the max heap, we have to bubble up the new
-        // index until it reaches a point where everything above it
-        // is bigger than it. This is considered heapify-up.
-        let mut current_heap_idx = size - 1;
-        while current_heap_idx != 0 {
-            let current_idx = self.max_idx_heap[current_heap_idx];
-            let current_data = self.get_data(current_idx);
-
-            let parent_heap_idx = (current_heap_idx - 1) / 2;
-            let parent_idx = self.max_idx_heap[parent_heap_idx];
-            let parent_data = self.get_data(parent_idx);
-
-            if parent_data > current_data {
-                break;
-            } else if parent_data == current_data && parent_idx > current_idx {
-                break;
-            }
-
-            let old_parent_idx = parent_idx;
-            self.max_idx_heap[parent_heap_idx] = current_idx;
-            self.max_idx_heap[current_heap_idx] = old_parent_idx;
-
-            current_heap_idx = parent_heap_idx;
-        }
-    }
-
-    pub fn push(&mut self, index: usize) {
-        self.max_idx_heap.push(index);
-
-        if self.max_idx_heap.len() <= 1 {
-            return;
-        }
-
-        self.heapify_up(self.max_idx_heap.len());
-    }
-
     pub fn pop(&mut self) -> Option<usize> {
-        if self.max_idx_heap.is_empty() {
-            return None;
+        if let Some(largest_cube_entry) = self.heap.pop() {
+            return Some(largest_cube_entry.idx);
         }
 
-        // The last element is swapped with the root of the max heap
-        // in order to ensure that we are only going to swap values downward.
-        let max_value = self.max_idx_heap[0];
-        self.max_idx_heap[0] = self.max_idx_heap[self.max_idx_heap.len() - 1];
-        self.max_idx_heap.pop();
-
-        if self.max_idx_heap.is_empty() {
-            return Some(max_value);
-        }
-
-        // We still want to preserve the max heap, even when removing the root.
-        // This segment is the inverse of heapify-up, where we want to shift down the newest
-        // item we chose as root to be in a spot where there is nothing smaller below it.
-        let mut current_heap_idx = 0;
-        loop {
-            let current_idx = self.max_idx_heap[current_heap_idx];
-            let current_data = self.get_data(current_idx);
-
-            let left_heap_idx = (2 * current_heap_idx) + 1;
-            let right_heap_idx = (2 * current_heap_idx) + 2;
-
-            let mut max_data = current_data;
-            let mut max_heap_idx = current_heap_idx;
-            let mut max_idx = current_idx;
-            if let Some(left_idx) = self.max_idx_heap.get(left_heap_idx) {
-                let left_data = self.get_data(*left_idx);
-
-                if left_data > max_data || (left_data == max_data && *left_idx > max_idx) {
-                    max_data = left_data;
-                    max_heap_idx = left_heap_idx;
-                    max_idx = *left_idx;
-                }
-            }
-
-            if let Some(right_idx) = self.max_idx_heap.get(right_heap_idx) {
-                let right_data = self.get_data(*right_idx);
-
-                if right_data > max_data || (right_data == max_data && *right_idx > max_idx) {
-                    max_heap_idx = right_heap_idx;
-                    max_idx = *right_idx;
-                }
-            }
-
-            if max_heap_idx == current_heap_idx {
-                break;
-            }
-
-            self.max_idx_heap[max_heap_idx] = current_idx;
-            self.max_idx_heap[current_heap_idx] = max_idx;
-
-            current_heap_idx = max_heap_idx;
-        }
-
-        Some(max_value)
+        return None;
     }
 
     pub fn has_visited(&self, idx: usize) -> bool {
@@ -141,7 +54,7 @@ impl BinaryIndexHeap {
     }
 
     pub fn get_data(&self, idx: usize) -> u16 {
-        *self.node_data.get(&idx).unwrap()
+        *self.data.get(&idx).unwrap()
     }
 }
 
