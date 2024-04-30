@@ -1,6 +1,6 @@
 use super::mapping::{idx_1d_from, idx_3d_from, GridReader, GridSizes};
 use super::LargestCube;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashSet};
 
 #[derive(Eq, PartialEq, Ord, PartialOrd)]
 pub struct LargestCubeEntry {
@@ -28,12 +28,10 @@ impl BinaryIndexHeap {
             });
         }
 
-        let index_max_heap = BinaryIndexHeap {
+        BinaryIndexHeap {
             heap,
             visited: HashSet::new(),
-        };
-
-        index_max_heap
+        }
     }
 
     pub fn pop(&mut self) -> Option<LargestCubeEntry> {

@@ -1,5 +1,4 @@
 use schematic2bls::*;
-mod blockland;
 
 use std::env;
 use std::path::Path;
@@ -22,7 +21,7 @@ fn main() {
         default_scaling_factor
     };
 
-    let model = load_schematic(&model_path);
+    let model = load_schematic(model_path);
     let voxel_grid = parse_grid_from_model(model);
     let largest_cubes = extract_largest_cubes_from(voxel_grid, scaling_factor as u16);
     let bricks = extract_bricks_from(largest_cubes);

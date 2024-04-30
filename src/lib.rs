@@ -46,7 +46,7 @@ pub fn extract_bricks_from(largest_cubes: Vec<LargestCube>) -> Vec<Brick> {
 pub fn write_save_file(bricks: &Vec<Brick>, file_name: String) {
     let mut save_file =
         File::create(file_name).expect("schematic2bls: Could not create save file.");
-    let save_file_content = to_save_file_output(&bricks);
+    let save_file_content = to_save_file_output(bricks);
     save_file
         .write_all(save_file_content.as_bytes())
         .expect("schematic2bls: Could not write save data to new save file");

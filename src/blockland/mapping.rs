@@ -31,6 +31,12 @@ impl BrickBuilder {
     }
 }
 
+impl Default for BrickBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 fn right_to_center_coord(right_coord: f32, size: u16) -> f32 {
     right_coord - (size as f32 / 2.0)
 }
